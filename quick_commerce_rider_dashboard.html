@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Express Rider Pro - Dhaka Spec</title>
+    <!-- Tailwind CSS for modern utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for standard mobile-app icon packs -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Inter Font for superior readability on small mobile UI -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Clean background slate */
+        }
+        /* Hide scrollbars for absolute native app feeling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* Custom pulse animations for radar & incoming offers */
+        @keyframes customPulse {
+            0%, 100% { transform: scale(1); opacity: 0.25; }
+            50% { transform: scale(1.35); opacity: 0.65; }
+        }
+        .pulse-ring {
+            animation: customPulse 2s infinite ease-in-out;
+        }
+        /* Switch slide transition */
+        .toggle-dot {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Premium custom glow matching image_3794db.png primary teal */
+        .glow-brand {
+            box-shadow: 0 0 15px rgba(13, 131, 104, 0.35);
+        }
+        .glow-blue {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+        /* Custom strike-through transition for item checklist */
+        .checked-item-line {
+            text-decoration: line-through;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row items-center justify-center p-4 lg:p-8 gap-8 overflow-x-hidden text-slate-800">
+
+    <!-- LEFT PANEL: Designer Notes & Simulation Controls -->
+    <div class="w-full lg:w-[420px] bg-white p-6 rounded-2xl border border-slate-200/80 flex flex-col gap-6 shadow-xl">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="px-2.5 py-1 text-xs font-semibold bg-[#0d8368]/10 text-[#0d8368] rounded-full border border-[#0d8368]/20">
+                    Dhaka Delivery Spec
+                </span>
+                <span class="text-xs text-slate-400 font-medium">v4.5 (Product Handover Spec)</span>
+            </div>
+            <h1 class="text-2xl font-extrabold bg-gradient-to-r from-[#0d8368] to-emerald-600 bg-clip-text text-transparent">Q-Express Dhaka</h1>
+            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                Premium rider companion interface designed with the precise brand teal (<strong class="text-[#0d8368]">#0d8368</strong>) from <strong class="text-[#0d8368]">image_3794db.png</strong>. Features realistic dispatcher cards, card detailed expansion views, safety sliders, and active COD tracking.
+            </p>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4">
+            <h3 class="text-sm font-bold text-slate-800 mb-3"><i class="fa-solid fa-gamepad mr-2 text-[#0d8368]"></i>Simulation Console</h3>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button onclick="simulateOrder('Prepaid')" class="p-3 bg-slate-50 hover:bg-[#0d8368] hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-20 shadow-sm active:scale-95">
+                    <span class="font-bold block mb-1">Simulate Prepaid</span>
+                    <span class="text-[10px] opacity-80">Paid online. ৳75 base payout.</span>
+                </button>
+                <button onclick="simulateOrder('COD')" class="p-3 bg-slate-50 hover:bg-orange-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-20 shadow-sm active:scale-95">
+                    <span class="font-bold block mb-1">Simulate COD</span>
+                    <span class="text-[10px] opacity-80">Collect ৳680 from customer.</span>
+                </button>
+                <button onclick="toggleSurge()" class="p-3 bg-slate-50 hover:bg-amber-500 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-20 shadow-sm active:scale-95">
+                    <span class="font-bold block mb-1">Monsoon Rain Alert</span>
+                    <span id="surgeBtnText" class="text-[10px] opacity-80">Active +৳25 Rain Bonus</span>
+                </button>
+                <button onclick="addSimulatedCash()" class="p-3 bg-slate-50 hover:bg-rose-500 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-20 shadow-sm active:scale-95">
+                    <span class="font-bold block mb-1">Force Cash Flow</span>
+                    <span class="text-[10px] opacity-80">Trigger high-float cash warning.</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4 text-xs text-slate-500 space-y-3">
+            <h3 class="font-bold text-slate-700 mb-1">Rider-First Psychological Design:</h3>
+            <div class="flex gap-2 items-start">
+                <span class="w-5 h-5 bg-[#0d8368]/10 text-[#0d8368] flex items-center justify-center rounded-full font-bold flex-shrink-0 text-[10px]">1</span>
+                <p><strong>Merchant Handover Verification:</strong> Riders can interactively check off products at pickup to guarantee no item goes missing.</p>
+            </div>
+            <div class="flex gap-2 items-start">
+                <span class="w-5 h-5 bg-[#0d8368]/10 text-[#0d8368] flex items-center justify-center rounded-full font-bold flex-shrink-0 text-[10px]">2</span>
+                <p><strong>Insulated Bag Management:</strong> Visual markers tell riders if food is hot/cold to organize their delivery chest appropriately.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: iPhone 15 Pro Max Mockup Box -->
+    <div class="relative w-[390px] h-[844px] bg-slate-900 rounded-[55px] p-3 border-[6px] border-slate-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] flex-shrink-0 overflow-hidden">
+        <!-- Phone Speaker & Camera Island (Dynamic Island style) -->
+        <div class="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-full z-50 flex items-center justify-between px-3">
+            <div class="w-3.5 h-3.5 bg-slate-900 rounded-full border border-slate-800 flex items-center justify-center">
+                <div class="w-1 h-1 bg-blue-900 rounded-full"></div>
+            </div>
+            <div class="w-12 h-1 bg-zinc-800 rounded-full"></div>
+        </div>
+
+        <!-- Phone Side Button details -->
+        <div class="absolute -left-1.5 top-28 w-1 h-10 bg-slate-700 rounded-r-md"></div>
+        <div class="absolute -left-1.5 top-44 w-1 h-12 bg-slate-700 rounded-r-md"></div>
+        <div class="absolute -right-1.5 top-36 w-1 h-16 bg-slate-700 rounded-l-md"></div>
+
+        <!-- Inner Mobile Screen Content -->
+        <div class="w-full h-full bg-slate-50 rounded-[45px] overflow-hidden flex flex-col relative no-scrollbar">
+            
+            <!-- Mobile Top Status Bar -->
+            <div class="h-11 px-6 pt-3 flex items-center justify-between text-xs font-semibold text-slate-800 z-40 select-none">
+                <span id="statusBarTime">12:30 PM</span>
+                <div class="flex items-center gap-1.5">
+                    <span id="signalStrength" class="text-[10px] tracking-widest"><i class="fa-solid fa-signal text-[#0d8368]"></i> GP 4G</span>
+                    <i class="fa-solid fa-battery-three-quarters text-slate-700 text-[11px]"></i>
+                </div>
+            </div>
+
+            <!-- Main App Body Wrapper -->
+            <div class="flex-1 flex flex-col justify-between relative no-scrollbar overflow-hidden">
+                
+                <!-- SCREEN 1: HOME TAB (DYNAMIC STATE CONTAINER) -->
+                <div id="homeScreen" class="flex-1 flex flex-col justify-between p-4 overflow-y-auto no-scrollbar pb-20">
+                    
+                    <!-- Profile & Status Card -->
+                    <div class="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200/60 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <img src="https://placehold.co/100x100/0d8368/ffffff?text=Kamal" alt="Profile" class="w-11 h-11 rounded-full object-cover border-2 border-slate-100">
+                                <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#0d8368] border-2 border-white rounded-full animate-pulse"></span>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1">
+                                    Kamal Hossain <i class="fa-solid fa-circle-check text-[#0d8368] text-xs"></i>
+                                </h4>
+                                <span class="text-[11px] text-slate-500 flex items-center gap-1">
+                                    <i class="fa-solid fa-motorcycle text-[#0d8368]"></i> 
+                                    Dhanmondi Zone
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- ONLINE/OFFLINE SWIPE & TOGGLE -->
+                        <div class="flex flex-col items-end">
+                            <button id="onlineToggler" onclick="toggleOnlineState()" class="relative w-14 h-8 bg-slate-200 rounded-full transition-colors duration-300 focus:outline-none">
+                                <div id="toggleDot" class="absolute top-1 left-1 w-6 h-6 bg-slate-400 rounded-full flex items-center justify-center shadow-md toggle-dot">
+                                    <i id="toggleIcon" class="fa-solid fa-power-off text-[10px] text-white"></i>
+                                </div>
+                            </button>
+                            <span id="onlineStatusLabel" class="text-[9px] font-extrabold text-slate-400 tracking-wider mt-1 uppercase">OFFLINE</span>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Notification Area (Surge/Weather updates) -->
+                    <div id="alertBanner" class="hidden mt-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-3 shadow-sm text-left">
+                        <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-700 animate-pulse">
+                            <i class="fa-solid fa-cloud-showers-heavy text-sm"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h5 class="text-xs font-bold text-amber-800">Monsoon Rain Bonus Active!</h5>
+                            <p class="text-[10px] text-slate-600 leading-tight">Additional +৳25 added to every trip finished in Dhanmondi.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cash-In-Hand Limit Warning -->
+                    <div id="floatLimitBanner" class="hidden mt-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex flex-col gap-1.5 text-left">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-700">
+                                <i class="fa-solid fa-wallet text-xs"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h5 class="text-xs font-bold text-rose-800">Cash Limit Reached! (৳3,000 max)</h5>
+                                <p class="text-[9px] text-slate-600 leading-tight">Deposit collected cash via bKash/Nagad to keep receiving orders.</p>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div id="floatLimitProgress" class="bg-rose-500 h-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Metrics Panel -->
+                    <div class="mt-4 grid grid-cols-3 gap-2.5">
+                        <div class="bg-white border border-slate-200/50 p-2.5 rounded-2xl text-center flex flex-col justify-between shadow-sm">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Today's Cash</span>
+                            <span id="cashInHandDisplay" class="text-sm font-black text-slate-800 mt-1">৳450</span>
+                            <span class="text-[8px] text-slate-400 font-semibold">Limit: ৳3,000</span>
+                        </div>
+                        <div class="bg-white border border-slate-200/50 p-2.5 rounded-2xl text-center flex flex-col justify-between shadow-sm">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Earnings</span>
+                            <span id="earningsDisplay" class="text-sm font-black text-[#0d8368] mt-1">৳1,240</span>
+                            <span class="text-[8px] text-emerald-600 font-semibold"><i class="fa-solid fa-bolt"></i> Target Met</span>
+                        </div>
+                        <div class="bg-white border border-slate-200/50 p-2.5 rounded-2xl text-center flex flex-col justify-between shadow-sm">
+                            <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Completed</span>
+                            <span id="tripsDisplay" class="text-sm font-black text-slate-800 mt-1">08</span>
+                            <span class="text-[8px] text-slate-400 font-medium">Daily Target: 12</span>
+                        </div>
+                    </div>
+
+                    <!-- STATE 1: OFFLINE VIEW -->
+                    <div id="offlineStateContainer" class="flex-1 flex flex-col items-center justify-center py-10">
+                        <div class="relative w-40 h-40 flex items-center justify-center mb-4">
+                            <!-- Inactive Radar circle -->
+                            <div class="absolute inset-0 bg-slate-200 rounded-full opacity-50"></div>
+                            <div class="w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-md border border-slate-200">
+                                <i class="fa-solid fa-motorcycle text-4xl text-slate-300"></i>
+                            </div>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-800 text-center">Duty Status: Offline</h3>
+                        <p class="text-xs text-slate-500 text-center max-w-[280px] mt-2 leading-relaxed">
+                            Turn on the duty switch at the top to start receiving food and grocery delivery requests near Dhanmondi.
+                        </p>
+                    </div>
+
+                    <!-- STATE 2: ONLINE / SEARCHING FOR ORDERS VIEW -->
+                    <div id="onlineStateContainer" class="hidden flex-1 flex flex-col pt-4">
+                        <!-- Dispatch Radar Scanner -->
+                        <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between mb-4 shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="relative w-10 h-10 flex items-center justify-center">
+                                    <div class="absolute inset-0 bg-[#0d8368]/20 rounded-full pulse-ring"></div>
+                                    <div class="w-6 h-6 bg-[#0d8368] rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                        <i class="fa-solid fa-location-crosshairs animate-spin"></i>
+                                    </div>
+                                </div>
+                                <div class="text-left">
+                                    <h4 class="text-xs font-extrabold text-[#0d8368] tracking-wider uppercase">Active Dispatch Feed</h4>
+                                    <p class="text-[11px] text-slate-500">Scanning Dhanmondi Road 27 Hub...</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 text-[10px] font-bold bg-[#0d8368]/10 text-[#0d8368] rounded-lg">High Demand</span>
+                        </div>
+
+                        <!-- Available Orders Job Cards -->
+                        <div class="space-y-3 flex-1 overflow-y-auto max-h-[360px] no-scrollbar">
+                            <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-left">Nearby Available Jobs (<span id="jobPoolCount">2</span>)</h4>
+                            
+                            <div id="jobPoolList" class="space-y-3">
+                                <!-- CARD 1: Prepaid job card -->
+                                <div onclick="openOrderDetails('Prepaid')" class="group bg-white border-2 border-transparent hover:border-[#0d8368] p-3.5 rounded-2xl flex flex-col gap-3 shadow-sm transition-all duration-200 cursor-pointer text-left transform active:scale-[0.99] relative">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="px-2 py-0.5 text-[9px] font-bold bg-sky-100 text-sky-700 rounded-md uppercase tracking-wider">Prepaid</span>
+                                            <h3 class="text-lg font-black text-slate-800 mt-1">৳75.00</h3>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[10px] font-bold text-slate-400 block uppercase">Transit</span>
+                                            <span class="text-xs font-extrabold text-slate-700">1.8 km total</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1 text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0"></span>
+                                            <p class="text-slate-600 font-medium truncate">Pandamart (Dhanmondi 27)</p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 bg-[#0d8368] rounded-full flex-shrink-0"></span>
+                                            <p class="text-slate-500 truncate">House 42, Road 8/A, near Satmasjid Rd</p>
+                                        </div>
+                                    </div>
+                                    <div class="border-t border-slate-100 pt-2 flex items-center justify-between text-[11px] text-slate-400">
+                                        <span><i class="fa-solid fa-box mr-1"></i> Packets: 4 Items (5.5 kg)</span>
+                                        <span class="text-[#0d8368] font-bold group-hover:translate-x-1 transition-transform">Details & Accept <i class="fa-solid fa-chevron-right ml-1"></i></span>
+                                    </div>
+                                </div>
+
+                                <!-- CARD 2: Cash on Delivery job card -->
+                                <div onclick="openOrderDetails('COD')" class="group bg-white border-2 border-transparent hover:border-[#0d8368] p-3.5 rounded-2xl flex flex-col gap-3 shadow-sm transition-all duration-200 cursor-pointer text-left transform active:scale-[0.99] relative">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="px-2 py-0.5 text-[9px] font-bold bg-orange-100 text-orange-700 rounded-md uppercase tracking-wider">Collect Cash (COD)</span>
+                                            <h3 class="text-lg font-black text-slate-800 mt-1">৳75.00</h3>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[10px] font-bold text-slate-400 block uppercase">Transit</span>
+                                            <span class="text-xs font-extrabold text-slate-700">2.4 km total</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1 text-xs">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0"></span>
+                                            <p class="text-slate-600 font-medium truncate">Kacchi Bhai (Dhanmondi 27)</p>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 bg-[#0d8368] rounded-full flex-shrink-0"></span>
+                                            <p class="text-slate-500 truncate">Lakeview Apartments, Road 15</p>
+                                        </div>
+                                    </div>
+                                    <div class="border-t border-slate-100 pt-2 flex items-center justify-between text-[11px] text-slate-400">
+                                        <span><i class="fa-solid fa-box-open mr-1"></i> Collect: ৳680.00 (3 Items)</span>
+                                        <span class="text-[#0d8368] font-bold group-hover:translate-x-1 transition-transform">Details & Accept <i class="fa-solid fa-chevron-right ml-1"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DETAILED JOB SCREEN PANEL -->
+                    <div id="jobDetailsContainer" class="hidden bg-white border border-slate-200 rounded-3xl p-4 shadow-2xl relative overflow-hidden my-auto text-left transition-all duration-300 max-h-[640px] overflow-y-auto no-scrollbar">
+                        <!-- Top back / dismiss trigger -->
+                        <div class="flex justify-between items-center mb-4">
+                            <button onclick="dismissOrderDetails()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrow-left"></i> Feed
+                            </button>
+                            <span class="px-2 py-0.5 text-[9px] font-bold bg-[#0d8368]/10 text-[#0d8368] rounded-md uppercase tracking-wider">Job Dispatch Panel</span>
+                        </div>
+
+                        <!-- Header payout summary -->
+                        <div class="bg-gradient-to-r from-[#0d8368]/5 to-emerald-500/10 p-3 rounded-2xl border border-[#0d8368]/10 mb-3 flex justify-between items-center">
+                            <div>
+                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Net Job Earning</span>
+                                <h2 class="text-2xl font-black text-slate-800 flex items-center gap-1.5 mt-0.5">
+                                    <span id="detailPayoutAmount">৳75.00</span>
+                                    <span id="detailRainBonus" class="text-[9px] font-bold text-amber-700 bg-amber-500/15 px-1.5 py-0.5 rounded-md hidden">+৳25 Rain</span>
+                                </h2>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Total distance</span>
+                                <h4 id="detailTotalDistance" class="text-sm font-extrabold text-slate-700 mt-0.5">1.8 km</h4>
+                            </div>
+                        </div>
+
+                        <!-- Payment Type & Weight Detail Cards -->
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col justify-between">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">Load Details</span>
+                                <span id="detailPackageWeight" class="text-xs font-bold text-slate-700 mt-1 flex items-center gap-1"><i class="fa-solid fa-weight-hanging text-[#0d8368]"></i> 5.5 kg total</span>
+                            </div>
+                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex flex-col justify-between">
+                                <span class="text-[9px] font-bold text-slate-400 uppercase">Payment Policy</span>
+                                <span id="detailPaymentPolicy" class="text-xs font-bold text-sky-700 mt-1 flex items-center gap-1"><i class="fa-solid fa-circle-check text-sky-500"></i> No cash collection</span>
+                            </div>
+                        </div>
+
+                        <!-- PRODUCT DETAILS LIST (Critical info about what to collect) -->
+                        <div class="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Product Inventory Preview</h4>
+                                <span id="detailItemCountBadge" class="px-1.5 py-0.5 bg-slate-200 text-slate-700 text-[9px] font-bold rounded-md">4 items</span>
+                            </div>
+                            <!-- Dynamic Product list rows -->
+                            <div id="detailProductsList" class="space-y-2 text-xs">
+                                <!-- Generated Dynamically by JS based on order -->
+                            </div>
+                        </div>
+
+                        <!-- Pick / Drop Timeline Visuals -->
+                        <div class="space-y-4 relative pl-7 mb-4 before:content-[''] before:absolute before:left-[11px] before:top-[16px] before:bottom-[16px] before:w-[2px] before:bg-dashed before:border-l-2 before:border-slate-300">
+                            <!-- Pick point -->
+                            <div class="relative">
+                                <span class="absolute -left-7 top-1 w-[24px] h-[24px] rounded-full bg-blue-500/15 border-2 border-blue-400 flex items-center justify-center text-[10px] text-blue-600 font-extrabold">P</span>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <h4 id="detailPickupStoreName" class="text-xs font-bold text-slate-800">Pandamart (Dhanmondi)</h4>
+                                        <span class="text-[9px] bg-blue-500/10 text-blue-600 px-1.5 py-0.5 rounded font-semibold">Pickup</span>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mt-0.5">Dhanmondi Road 27, Beside Pizza Hut</p>
+                                </div>
+                            </div>
+                            <!-- Drop point -->
+                            <div class="relative">
+                                <span class="absolute -left-7 top-1 w-[24px] h-[24px] rounded-full bg-[#0d8368]/15 border-2 border-[#0d8368] flex items-center justify-center text-[10px] text-[#0d8368] font-extrabold">D</span>
+                                <div>
+                                    <div class="flex items-center gap-1.5">
+                                        <h4 id="detailDropoffHeader" class="text-xs font-bold text-slate-800">Customer Address</h4>
+                                        <span class="text-[9px] bg-[#0d8368]/10 text-[#0d8368] px-1.5 py-0.5 rounded font-semibold">Dropoff</span>
+                                    </div>
+                                    <p id="detailDropoffSubtitle" class="text-[10px] text-slate-500 mt-0.5">House 42, Road 8/A, near Satmasjid Road</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- COD warning if applicable -->
+                        <div id="detailsCodNotice" class="hidden mb-4 p-3 bg-orange-50 border border-orange-200 text-orange-800 rounded-xl text-[11px] flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-orange-600"></i>
+                            <p><strong>Note:</strong> You must collect exactly <strong id="detailsCodAmountSpan">৳680.00</strong> from customer doorstep.</p>
+                        </div>
+
+                        <!-- SWIPE TO ACCEPT BUTTON -->
+                        <div class="relative bg-slate-100 rounded-2xl h-14 border border-slate-200 flex items-center justify-between p-1 overflow-hidden select-none mb-2">
+                            <div id="swipeTargetText" class="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-500 pointer-events-none tracking-wide">
+                                Swipe right to Accept >>
+                            </div>
+                            
+                            <!-- Sliding Handle with Brand Color -->
+                            <div id="swipeHandle" class="w-12 h-12 bg-[#0d8368] hover:bg-[#0c725a] rounded-xl flex items-center justify-center text-white cursor-grab active:cursor-grabbing transition-all glow-brand z-20">
+                                <i class="fa-solid fa-angles-right text-lg animate-pulse"></i>
+                            </div>
+
+                            <!-- Reject button -->
+                            <button onclick="dismissOrderDetails()" class="absolute right-3 w-8 h-8 rounded-lg bg-white hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 flex items-center justify-center transition-colors border border-slate-200 z-20">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STATE 4: ACTIVE ROUTE & NAVIGATION -->
+                    <div id="activeRouteContainer" class="hidden flex-1 flex flex-col justify-between my-auto gap-3 text-left max-h-[640px] overflow-y-auto no-scrollbar">
+                        
+                        <!-- Navigation Info Banner -->
+                        <div class="bg-white border border-slate-200 rounded-2xl p-3 flex items-center justify-between shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div id="navigationPhaseIcon" class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600">
+                                    <i class="fa-solid fa-store text-lg"></i>
+                                </div>
+                                <div class="text-left">
+                                    <span id="routePhaseLabel" class="text-[9px] font-extrabold text-blue-600 tracking-wider uppercase">Phase 1: Travel to Store</span>
+                                    <h4 id="routeActionTitle" class="text-xs font-bold text-slate-800 mt-0.5">Collect order packets</h4>
+                                    <p id="routeActionSubtitle" class="text-[10px] text-slate-500 font-semibold">Payment Status: Prepaid</p>
+                                </div>
+                            </div>
+                            <!-- Call/Help buttons -->
+                            <div class="flex gap-1.5">
+                                <a href="tel:0171234567" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+                                    <i class="fa-solid fa-phone text-xs"></i>
+                                </a>
+                                <button onclick="triggerHelpMenu()" class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 hover:bg-slate-200 transition-colors">
+                                    <i class="fa-solid fa-circle-question text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Canvas-based live routing Map -->
+                        <div class="relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-inner h-32">
+                            <canvas id="liveMapCanvas" class="w-full h-full block bg-slate-50"></canvas>
+                            
+                            <!-- Overlay Mini Controls on Map -->
+                            <div class="absolute bottom-2 left-2 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-lg border border-slate-200 flex items-center gap-1.5 text-[9px] font-bold text-slate-700">
+                                <div class="w-1.5 h-1.5 bg-[#0d8368] rounded-full animate-ping"></div>
+                                <span id="mapStatusIndicator">GPS Pinlocked - Dhanmondi</span>
+                            </div>
+
+                            <button onclick="recenterMap()" class="absolute bottom-2 right-2 w-7 h-7 bg-white/95 backdrop-blur-md rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-800 hover:bg-slate-50">
+                                <i class="fa-solid fa-crosshairs text-xs"></i>
+                            </button>
+                        </div>
+
+                        <!-- ACTIVE CHECKLIST BOX (Ensures correct pickup handover) -->
+                        <div id="activeChecklistBox" class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
+                            <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-slate-100">
+                                <div class="text-left">
+                                    <h4 class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Merchant Item Checklist</h4>
+                                    <p class="text-[9px] text-slate-400">Tap items below to verify physical count</p>
+                                </div>
+                                <span id="checklistProgress" class="px-2 py-0.5 bg-[#0d8368]/15 text-[#0d8368] text-[9px] font-black rounded-full">0/4 Verified</span>
+                            </div>
+
+                            <!-- Checkable item checklist container -->
+                            <div id="interactiveChecklist" class="space-y-2 text-xs">
+                                <!-- Populated dynamically by active job details -->
+                            </div>
+
+                            <div class="mt-2.5 p-2 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-[10px] text-slate-500 flex items-center gap-1.5">
+                                <i class="fa-solid fa-clipboard-check text-slate-400"></i>
+                                <span>Rider Verification is required before exiting the dark store.</span>
+                            </div>
+                        </div>
+
+                        <!-- Real-World Customer Instructions & Drop Addresses -->
+                        <div class="bg-white border border-slate-200/60 p-3 rounded-2xl flex flex-col gap-2">
+                            <div class="flex justify-between text-[10px] text-slate-500 font-semibold">
+                                <span>Order ID: <strong id="activeOrderIdSpan" class="text-slate-700">#QX-9410</strong></span>
+                                <span>Handover Pin: <strong id="storePickupPin" class="text-blue-600">5902</strong></span>
+                            </div>
+                            
+                            <!-- Address detail -->
+                            <div class="border-t border-slate-100 pt-2 flex items-start gap-2">
+                                <div class="w-2.5 h-2.5 bg-rose-500 rounded-full mt-1 flex-shrink-0"></div>
+                                <div class="flex-1">
+                                    <p id="currentPhaseAddress" class="text-xs text-slate-700 font-semibold leading-tight">Pandamart (Dhanmondi Road 27)</p>
+                                    <!-- Dynamic Instruction for Customer Drops -->
+                                    <div id="dropInstructionContainer" class="hidden mt-1.5 p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-left">
+                                        <p class="text-[9px] text-amber-800 leading-tight">
+                                            <i class="fa-solid fa-bell-slash mr-1"></i><strong>Note:</strong> Baby sleeping. Please call from gate instead of ringing the bell!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- OTP VERIFICATION COMPONENT -->
+                        <div id="deliveryOtpSection" class="hidden bg-white border border-slate-200 p-3 rounded-2xl flex flex-col gap-2 shadow-sm">
+                            <div class="flex items-center justify-between">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Input Customer 4-Digit OTP</label>
+                                <span class="text-[9px] text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded font-semibold">Ask Customer</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <input type="text" id="otpInput" maxlength="4" placeholder="••••" class="w-1/2 text-center text-sm font-bold bg-slate-50 border border-slate-200 rounded-xl p-2 focus:outline-none focus:border-[#0d8368]">
+                                <button onclick="verifyAndSubmitOtp()" class="w-1/2 bg-[#0d8368] hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all active:scale-[0.98]">
+                                    Verify & Drop
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Swipe Action Step Trigger (Online Swipe Mechanism) -->
+                        <div id="routeSwipeContainer" class="relative bg-slate-100 rounded-2xl h-14 border border-slate-200 flex items-center p-1 overflow-hidden select-none">
+                            <div id="routeSwipeText" class="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-500 pointer-events-none tracking-wide">
+                                Swipe right to Complete Pickup >>
+                            </div>
+                            <!-- Slidable Trigger Handle -->
+                            <div id="routeSwipeHandle" class="w-12 h-12 bg-blue-500 hover:bg-blue-600 rounded-xl flex items-center justify-center text-white cursor-grab active:cursor-grabbing transition-all glow-blue z-20">
+                                <i id="routeSwipeIcon" class="fa-solid fa-angles-right text-lg animate-pulse"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- SCREEN 2: HEATMAP TAB -->
+                <div id="heatmapScreen" class="hidden flex-1 flex flex-col p-4 pb-20 overflow-y-auto no-scrollbar text-left">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-base font-bold text-slate-800">High Demand Zones</h3>
+                        <span class="px-2 py-0.5 bg-rose-500/10 text-rose-600 border border-rose-500/20 text-[10px] rounded-lg font-bold">Surge Active</span>
+                    </div>
+
+                    <!-- Interactive Demand Map Container -->
+                    <div class="relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm h-80 mb-4">
+                        <canvas id="demandMapCanvas" class="w-full h-full block bg-slate-50"></canvas>
+                        
+                        <!-- Map Legend Overlays -->
+                        <div class="absolute top-2 left-2 flex flex-col gap-1.5 bg-white/95 backdrop-blur-md p-2 rounded-xl border border-slate-200 text-[10px] shadow-sm">
+                            <div class="flex items-center gap-1.5 font-bold text-rose-600">
+                                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 opacity-80"></span> Extra +৳35/trip
+                            </div>
+                            <div class="flex items-center gap-1.5 font-bold text-amber-600">
+                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 opacity-80"></span> Extra +৳15/trip
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommended Hotspots suggestions for more delivery matching -->
+                    <div class="space-y-2.5">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Closest Hotspots</h4>
+                        <div class="p-3 bg-white hover:bg-slate-50 border border-slate-200/60 rounded-2xl flex items-center justify-between transition-colors shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-lg">🔥</span>
+                                <div class="text-left">
+                                    <h5 class="text-xs font-bold text-slate-800">Satmasjid Road Intersection</h5>
+                                    <p class="text-[10px] text-slate-400">12 unassigned pending orders</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-extrabold text-rose-600">+৳35 / trip</span>
+                        </div>
+                        <div class="p-3 bg-white hover:bg-slate-50 border border-slate-200/60 rounded-2xl flex items-center justify-between transition-colors shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-lg">⚡</span>
+                                <div class="text-left">
+                                    <h5 class="text-xs font-bold text-slate-800">Green Road Hub</h5>
+                                    <p class="text-[10px] text-slate-400">5 pending grocery orders</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-extrabold text-amber-600">+৳15 / trip</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCREEN 3: EARNINGS DETAIL TAB -->
+                <div id="earningsScreen" class="hidden flex-1 flex flex-col p-4 pb-20 overflow-y-auto no-scrollbar text-left">
+                    <h3 class="text-base font-bold text-slate-800 mb-3">My Earnings</h3>
+                    
+                    <!-- Weekly overview stats with Brand Teal Background from image_3794db.png -->
+                    <div class="bg-[#0d8368] rounded-2xl p-4 text-white shadow-lg mb-4 flex flex-col gap-4 glow-brand">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-medium opacity-85 uppercase tracking-wide">Weekly Consolidated Payout</span>
+                                <h1 class="text-3xl font-black mt-1">৳8,450</h1>
+                            </div>
+                            <span class="px-2.5 py-1 text-xs font-bold bg-white/20 rounded-full border border-white/25">92 Orders</span>
+                        </div>
+                        <!-- Goal metrics -->
+                        <div>
+                            <div class="flex justify-between text-xs font-medium opacity-90 mb-1.5">
+                                <span>Weekly Incentive Progress</span>
+                                <span>78% Achieved</span>
+                            </div>
+                            <div class="w-full h-2 bg-black/15 rounded-full overflow-hidden">
+                                <div class="w-[78%] h-full bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily transaction breakdown lists -->
+                    <div class="space-y-2.5">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Completed Deliveries Today</h4>
+                        
+                        <div class="p-3 bg-white border border-slate-200/60 rounded-2xl flex justify-between items-center shadow-sm">
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-800">Order #QX-9112</h5>
+                                <span class="text-[9px] text-slate-400">12:15 PM • Dhanmondi 27</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-bold text-[#0d8368]">+৳75</span>
+                                <p class="text-[9px] text-slate-400 font-semibold text-sky-600">Prepaid Card</p>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-white border border-slate-200/60 rounded-2xl flex justify-between items-center shadow-sm">
+                            <div>
+                                <h5 class="text-xs font-bold text-slate-800">Order #QX-8990</h5>
+                                <span class="text-[9px] text-slate-400">Yesterday • Sobhanbagh</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm font-bold text-[#0d8368]">+৳120</span>
+                                <p class="text-[9px] text-slate-400 font-semibold text-orange-600">Cash Collected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCREEN 4: PROFILE & PERFORMANCE SCORE TAB -->
+                <div id="profileScreen" class="hidden flex-1 flex flex-col p-4 pb-20 overflow-y-auto no-scrollbar text-left">
+                    <h3 class="text-base font-bold text-slate-800 mb-3">Rider Profile</h3>
+
+                    <div class="bg-white border border-slate-200/60 p-4 rounded-2xl text-center mb-4 shadow-sm">
+                        <img src="https://placehold.co/100x100/0d8368/ffffff?text=Kamal" alt="Rider profile picture" class="w-16 h-16 rounded-full mx-auto object-cover border-2 border-slate-100 mb-2">
+                        <h4 class="text-sm font-bold text-slate-800">Kamal Hossain</h4>
+                        <span class="text-xs text-slate-400 font-semibold">Rider ID: QX-DHK-9428</span>
+                    </div>
+
+                    <!-- Performance scores & levels -->
+                    <div class="grid grid-cols-2 gap-2.5 mb-4">
+                        <div class="p-3 bg-white border border-slate-200/60 rounded-xl text-center shadow-sm">
+                            <span class="text-[10px] text-slate-400 block font-semibold uppercase">Acceptance Rate</span>
+                            <span class="text-base font-black text-[#0d8368] mt-1 block">99.2%</span>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200/60 rounded-xl text-center shadow-sm">
+                            <span class="text-[10px] text-slate-400 block font-semibold uppercase">SLA Rating</span>
+                            <span class="text-base font-black text-amber-500 mt-1 block"><i class="fa-solid fa-crown mr-1"></i>Gold Level</span>
+                        </div>
+                    </div>
+
+                    <!-- Rider vehicle details -->
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3 bg-white border border-slate-200/60 rounded-xl flex justify-between shadow-sm">
+                            <span class="text-slate-500 font-medium">Motorcycle model:</span>
+                            <span class="font-bold text-slate-800">Suzuki Gixxer SF</span>
+                        </div>
+                        <div class="p-3 bg-white border border-slate-200/60 rounded-xl flex justify-between shadow-sm">
+                            <span class="text-slate-500 font-medium">Digital Plate No:</span>
+                            <span class="font-bold text-slate-800">DHK-METRO-L-52-8940</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Tab Bar Interface (Always sticky at bottom within shell) -->
+                <div class="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200/80 px-4 flex items-center justify-around z-40 select-none">
+                    <button onclick="switchTab('home')" id="homeTabBtn" class="flex flex-col items-center gap-1 text-[#0d8368] transition-colors focus:outline-none">
+                        <i class="fa-solid fa-house text-base"></i>
+                        <span class="text-[10px] font-bold">Home</span>
+                    </button>
+                    <button onclick="switchTab('heatmap')" id="heatmapTabBtn" class="flex flex-col items-center gap-1 text-slate-400 transition-colors focus:outline-none">
+                        <i class="fa-solid fa-map-location-dot text-base"></i>
+                        <span class="text-[10px] font-semibold">Hotspots</span>
+                    </button>
+                    <button onclick="switchTab('earnings')" id="earningsTabBtn" class="flex flex-col items-center gap-1 text-slate-400 transition-colors focus:outline-none">
+                        <i class="fa-solid fa-wallet text-base"></i>
+                        <span class="text-[10px] font-semibold">Earnings</span>
+                    </button>
+                    <button onclick="switchTab('profile')" id="profileTabBtn" class="flex flex-col items-center gap-1 text-slate-400 transition-colors focus:outline-none">
+                        <i class="fa-solid fa-user text-base"></i>
+                        <span class="text-[10px] font-semibold">Profile</span>
+                    </button>
+                </div>
+
+            </div>
+            
+            <!-- Home Indicator Bar for iPhone emulation styling -->
+            <div class="h-6 w-full flex justify-center items-center pb-1 z-40 select-none bg-white">
+                <div class="w-32 h-1 bg-slate-200 rounded-full"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Custom notification alert popup -->
+    <div id="customToastMessage" class="fixed top-6 left-1/2 -translate-x-1/2 bg-white border-2 border-[#0d8368] rounded-2xl px-5 py-3.5 shadow-2xl flex items-center gap-3 z-50 text-xs transition-all duration-300 translate-y-[-100px] opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-[#0d8368] text-lg"></i>
+        <div class="text-left">
+            <h5 class="font-extrabold text-slate-800">Success!</h5>
+            <p id="toastBody" class="text-slate-500 mt-0.5">Application data updated cleanly.</p>
+        </div>
+    </div>
+
+    <script>
+        // APP GLOBAL STATE ENGINE (Engineered for Dhaka Q-Commerce Logic)
+        const state = {
+            isOnline: false,
+            orderState: 'idle', // 'idle' | 'searching' | 'details' | 'accepted' | 'picked_up'
+            earningsToday: 1240,
+            tripsCount: 8,
+            cashInHand: 450,
+            maxFloatLimit: 3000,
+            isSurgeActive: false,
+            currentTab: 'home',
+            countdownSeconds: 15,
+            countdownInterval: null,
+            orderData: {
+                id: '#QX-9410',
+                store: 'Pandamart (Dhanmondi Road 27)',
+                storeCoords: { x: 80, y: 70 },
+                customer: 'House 42, Road 8/A (Near Satmasjid Road)',
+                customerCoords: { x: 280, y: 150 },
+                riderCoords: { x: 40, y: 170 },
+                payoutRate: 75,
+                paymentMode: 'Prepaid', // 'Prepaid' | 'COD'
+                codAmount: 0,
+                customerOtp: '2094', // Custom simulation pin to complete drops
+                items: [],
+                verifiedItems: 0
+            }
+        };
+
+        // Static inventories based on Payment Mode for logical simulation
+        const simulatedInventories = {
+            Prepaid: [
+                { name: 'ACI Pure Miniket Rice 5kg', qty: 1, type: 'Heavy', icon: 'fa-wheat-awn' },
+                { name: 'Aarong Liquid Milk 1L', qty: 2, type: 'Fragile/Cold', icon: 'fa-glass-water' },
+                { name: 'Pran Frooto Mango Juice 1L', qty: 1, type: 'Liquid', icon: 'fa-bottle-droplet' }
+            ],
+            COD: [
+                { name: 'Mutton Kacchi (Family Pack)', qty: 1, type: 'Hot Food', icon: 'fa-bowl-rice' },
+                { name: 'Special Shahi Borhani 1L', qty: 1, type: 'Liquid/Cold', icon: 'fa-bottle-water' },
+                { name: 'Coca-Cola Can 250ml', qty: 4, type: 'Cold Drink', icon: 'fa-wine-glass' }
+            ]
+        };
+
+        // Sound Engine for real-life haptic context
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playChime(type) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                if (type === 'incoming') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'success') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.4);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                }
+            } catch (err) {
+                console.log('Audio Engine Restricted:', err);
+            }
+        }
+
+        // Custom notification trigger
+        function showToast(title, desc) {
+            const toast = document.getElementById('customToastMessage');
+            toast.querySelector('h5').textContent = title;
+            document.getElementById('toastBody').textContent = desc;
+            toast.style.transform = 'translate(-50%, 24px)';
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.transform = 'translate(-50%, -100px)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        // TIME UPDATER UTILITY
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            const padMinutes = String(minutes).padStart(2, '0');
+            document.getElementById('statusBarTime').textContent = `${hours}:${padMinutes} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Update Float limit warning elements
+        function updateFloatLimitUI() {
+            const banner = document.getElementById('floatLimitBanner');
+            const fill = document.getElementById('floatLimitProgress');
+            
+            document.getElementById('cashInHandDisplay').textContent = `৳${state.cashInHand}`;
+            
+            const perc = Math.min((state.cashInHand / state.maxFloatLimit) * 100, 100);
+            fill.style.width = `${perc}%`;
+            
+            if (state.cashInHand >= 2500) {
+                banner.classList.remove('hidden');
+                if (state.cashInHand >= state.maxFloatLimit) {
+                    fill.classList.remove('bg-amber-500');
+                    fill.classList.add('bg-rose-500');
+                } else {
+                    fill.classList.remove('bg-rose-500');
+                    fill.classList.add('bg-amber-500');
+                }
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        // Add simulated float cash flow (Simulates picking up cash orders consecutively)
+        function addSimulatedCash() {
+            playChime('click');
+            state.cashInHand = 2850;
+            updateFloatLimitUI();
+            showToast("Warning limit triggered", "Cash in hand has spiked close to limit threshold.");
+        }
+
+        // TOGGLE RIDER DUTY STATUS
+        function toggleOnlineState() {
+            playChime('click');
+            
+            if (state.cashInHand >= state.maxFloatLimit) {
+                playChime('error');
+                showToast("Account Suspended", "You cannot go online. Deposit company float balance of ৳" + state.cashInHand);
+                return;
+            }
+
+            state.isOnline = !state.isOnline;
+            
+            const btn = document.getElementById('onlineToggler');
+            const dot = document.getElementById('toggleDot');
+            const icon = document.getElementById('toggleIcon');
+            const statusLabel = document.getElementById('onlineStatusLabel');
+            
+            const offlineContainer = document.getElementById('offlineStateContainer');
+            const onlineContainer = document.getElementById('onlineStateContainer');
+            
+            if (state.isOnline) {
+                btn.style.backgroundColor = '#0d8368';
+                dot.style.transform = 'translateX(24px)';
+                dot.style.backgroundColor = '#ffffff';
+                icon.className = 'fa-solid fa-power-off text-[10px] text-[#0d8368]';
+                statusLabel.textContent = 'ONLINE';
+                statusLabel.className = 'text-[9px] font-extrabold text-[#0d8368] tracking-wider mt-1 uppercase animate-pulse';
+                
+                offlineContainer.classList.add('hidden');
+                onlineContainer.classList.remove('hidden');
+                state.orderState = 'searching';
+                
+                showToast("Now Accepting Jobs", "Welcome back Kamal! System actively monitoring nearby dispatches.");
+            } else {
+                btn.style.backgroundColor = '#e2e8f0';
+                dot.style.transform = 'translateX(0px)';
+                dot.style.backgroundColor = '#94a3b8';
+                icon.className = 'fa-solid fa-power-off text-[10px] text-white';
+                statusLabel.textContent = 'OFFLINE';
+                statusLabel.className = 'text-[9px] font-extrabold text-slate-400 tracking-wider mt-1 uppercase';
+                
+                offlineContainer.classList.remove('hidden');
+                onlineContainer.classList.add('hidden');
+                document.getElementById('jobDetailsContainer').classList.add('hidden');
+                document.getElementById('activeRouteContainer').classList.add('hidden');
+                
+                if (state.countdownInterval) clearInterval(state.countdownInterval);
+                state.orderState = 'idle';
+                showToast("Duty Terminated", "Shift completed. Have a safe ride back home!");
+            }
+        }
+
+        // Setup Swipe to Accept Order Action Dragging
+        function setupSwipers() {
+            const handle = document.getElementById('swipeHandle');
+            const container = handle.parentElement;
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            
+            const onStart = (e) => {
+                if (state.orderState !== 'details') return;
+                isDragging = true;
+                startX = (e.type === 'touchstart') ? e.touches[0].clientX : e.clientX;
+                handle.style.transition = 'none';
+            };
+            
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const clientX = (e.type === 'touchmove') ? e.touches[0].clientX : e.clientX;
+                const deltaX = clientX - startX;
+                const maxSlideWidth = container.clientWidth - handle.clientWidth - 8;
+                
+                currentX = Math.max(0, Math.min(deltaX, maxSlideWidth));
+                handle.style.transform = `translateX(${currentX}px)`;
+            };
+            
+            const onEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                const maxSlideWidth = container.clientWidth - handle.clientWidth - 8;
+                
+                if (currentX > maxSlideWidth * 0.75) {
+                    handle.style.transform = `translateX(${maxSlideWidth}px)`;
+                    acceptOrder();
+                } else {
+                    handle.style.transition = 'all 0.25s ease-out';
+                    handle.style.transform = 'translateX(0px)';
+                }
+            };
+
+            handle.addEventListener('mousedown', onStart);
+            handle.addEventListener('touchstart', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove);
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
+        }
+
+        // Setup Active Route Swipe Completion slider
+        function setupRouteSwiper() {
+            const handle = document.getElementById('routeSwipeHandle');
+            const container = handle.parentElement;
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            
+            const onStart = (e) => {
+                isDragging = true;
+                startX = (e.type === 'touchstart') ? e.touches[0].clientX : e.clientX;
+                handle.style.transition = 'none';
+            };
+            
+            const onMove = (e) => {
+                if (!isDragging) return;
+                const clientX = (e.type === 'touchmove') ? e.touches[0].clientX : e.clientX;
+                const deltaX = clientX - startX;
+                const maxSlideWidth = container.clientWidth - handle.clientWidth - 8;
+                
+                currentX = Math.max(0, Math.min(deltaX, maxSlideWidth));
+                handle.style.transform = `translateX(${currentX}px)`;
+            };
+            
+            const onEnd = () => {
+                if (!isDragging) return;
+                isDragging = false;
+                const maxSlideWidth = container.clientWidth - handle.clientWidth - 8;
+                
+                if (currentX > maxSlideWidth * 0.75) {
+                    handle.style.transform = `translateX(${maxSlideWidth}px)`;
+                    advanceRouteStep();
+                } else {
+                    handle.style.transition = 'all 0.25s ease-out';
+                    handle.style.transform = 'translateX(0px)';
+                }
+            };
+
+            handle.addEventListener('mousedown', onStart);
+            handle.addEventListener('touchstart', onStart);
+            window.addEventListener('mousemove', onMove);
+            window.addEventListener('touchmove', onMove);
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
+        }
+
+        // OPEN ORDER DETAILS PANEL (Proper details expansion UX)
+        function openOrderDetails(mode) {
+            playChime('click');
+            state.orderState = 'details';
+
+            // Set dynamic order specifics
+            let payout = 75;
+            if (state.isSurgeActive) {
+                payout += 25;
+                document.getElementById('detailRainBonus').classList.remove('hidden');
+            } else {
+                document.getElementById('detailRainBonus').classList.add('hidden');
+            }
+            state.orderData.payoutRate = payout;
+            state.orderData.paymentMode = mode;
+            state.orderData.items = simulatedInventories[mode];
+            state.orderData.verifiedItems = 0;
+            
+            document.getElementById('detailPayoutAmount').textContent = `৳${payout.toFixed(2)}`;
+
+            // Populate Product List Preview
+            const productListContainer = document.getElementById('detailProductsList');
+            productListContainer.innerHTML = ''; // clear first
+            
+            let totalQty = 0;
+            state.orderData.items.forEach(item => {
+                totalQty += item.qty;
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-center bg-white p-2 rounded-xl border border-slate-100';
+                row.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500">
+                            <i class="fa-solid ${item.icon}"></i>
+                        </span>
+                        <div>
+                            <p class="font-bold text-slate-800">${item.name}</p>
+                            <span class="text-[9px] text-slate-400 uppercase font-semibold">${item.type}</span>
+                        </div>
+                    </div>
+                    <span class="px-2 py-0.5 bg-[#0d8368]/15 text-[#0d8368] font-bold rounded text-xs">x${item.qty}</span>
+                `;
+                productListContainer.appendChild(row);
+            });
+
+            document.getElementById('detailItemCountBadge').textContent = `${totalQty} units`;
+
+            // Populate text parameters realistically depending on payment type
+            const weightSpan = document.getElementById('detailPackageWeight');
+            const policySpan = document.getElementById('detailPaymentPolicy');
+            const codNotice = document.getElementById('detailsCodNotice');
+            const detailDropHeader = document.getElementById('detailDropoffHeader');
+            const detailDropSubtitle = document.getElementById('detailDropoffSubtitle');
+            const detailPickupStore = document.getElementById('detailPickupStoreName');
+
+            if (mode === 'COD') {
+                state.orderData.codAmount = 680;
+                document.getElementById('detailTotalDistance').textContent = "2.4 km";
+                weightSpan.innerHTML = `<i class="fa-solid fa-weight-hanging text-[#0d8368]"></i> 3.2 kg load`;
+                policySpan.className = "text-xs font-bold text-orange-700 mt-1 flex items-center gap-1";
+                policySpan.innerHTML = `<i class="fa-solid fa-money-bill-wave text-orange-500"></i> Cash on Delivery`;
+                codNotice.classList.remove('hidden');
+                document.getElementById('detailsCodAmountSpan').textContent = `৳${state.orderData.codAmount.toFixed(2)}`;
+                
+                // Set COD route markers
+                state.orderData.customerCoords = { x: 250, y: 130 };
+                detailPickupStore.textContent = "Kacchi Bhai (Dhanmondi)";
+                detailDropHeader.textContent = "Lakeview Apartments (Road 15)";
+                detailDropSubtitle.textContent = "Apt 4B, Road 15, Near Dhanmondi Lake Gate 3";
+            } else {
+                state.orderData.codAmount = 0;
+                document.getElementById('detailTotalDistance').textContent = "1.8 km";
+                weightSpan.innerHTML = `<i class="fa-solid fa-weight-hanging text-[#0d8368]"></i> 5.5 kg load`;
+                policySpan.className = "text-xs font-bold text-sky-700 mt-1 flex items-center gap-1";
+                policySpan.innerHTML = `<i class="fa-solid fa-circle-check text-sky-500"></i> Prepaid Online`;
+                codNotice.classList.add('hidden');
+
+                // Set Prepaid route markers
+                state.orderData.customerCoords = { x: 280, y: 150 };
+                detailPickupStore.textContent = "Pandamart (Dhanmondi)";
+                detailDropHeader.textContent = "Customer Residence (Road 8/A)";
+                detailDropSubtitle.textContent = "House 42, Road 8/A, near Satmasjid Road";
+            }
+
+            // Interface display transition
+            document.getElementById('onlineStateContainer').classList.add('hidden');
+            document.getElementById('jobDetailsContainer').classList.remove('hidden');
+
+            // Reset Swipe Acceptance positions
+            const swipeHandle = document.getElementById('swipeHandle');
+            swipeHandle.style.transition = 'none';
+            swipeHandle.style.transform = 'translateX(0px)';
+        }
+
+        // DISMISS ORDER DETAILS BACK TO POOL
+        function dismissOrderDetails() {
+            playChime('click');
+            state.orderState = 'searching';
+            document.getElementById('jobDetailsContainer').classList.add('hidden');
+            document.getElementById('onlineStateContainer').classList.remove('hidden');
+        }
+
+        // SIMULATE NEW INCOMING ORDER IN FEED
+        function simulateOrder(mode) {
+            if (!state.isOnline) {
+                showToast("Rider is Offline", "Toggle the duty switch first to receive incoming orders.");
+                return;
+            }
+            if (state.orderState === 'accepted' || state.orderState === 'picked_up') {
+                showToast("Job Already Active", "You must finish your current delivery first!");
+                return;
+            }
+
+            // Simulate pushing a new order in pool list dynamically
+            playChime('incoming');
+            showToast("New Dispatch Nearby", `A new ${mode} order is now available in your active feed pool.`);
+            
+            // Bring user back to Home dispatch feed to see card instantly
+            switchTab('home');
+        }
+
+        // ACCEPT ORDER TRIGGER
+        function acceptOrder() {
+            playChime('success');
+            
+            state.orderState = 'accepted';
+            document.getElementById('jobDetailsContainer').classList.add('hidden');
+            document.getElementById('activeRouteContainer').classList.remove('hidden');
+            
+            // Adjust step 1 details
+            document.getElementById('navigationPhaseIcon').className = 'w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-600';
+            document.getElementById('navigationPhaseIcon').innerHTML = '<i class="fa-solid fa-store text-lg"></i>';
+            document.getElementById('routePhaseLabel').textContent = 'Phase 1: Transit to Store';
+            document.getElementById('routePhaseLabel').className = 'text-[9px] font-extrabold text-blue-600 tracking-wider uppercase';
+            document.getElementById('routeActionTitle').textContent = 'Collect grocery packet';
+            document.getElementById('routeActionSubtitle').textContent = `Store Pickup Code: ${state.orderData.customerOtp}`;
+            
+            if (state.orderData.paymentMode === 'COD') {
+                document.getElementById('currentPhaseAddress').textContent = 'Kacchi Bhai (Dhanmondi Road 27)';
+                document.getElementById('activeOrderIdSpan').textContent = '#QX-8841';
+            } else {
+                document.getElementById('currentPhaseAddress').textContent = 'Pandamart (Dhanmondi Road 27)';
+                document.getElementById('activeOrderIdSpan').textContent = '#QX-9410';
+            }
+            document.getElementById('dropInstructionContainer').classList.add('hidden');
+            document.getElementById('deliveryOtpSection').classList.add('hidden');
+            
+            document.getElementById('routeSwipeContainer').classList.remove('hidden');
+            document.getElementById('routeSwipeText').textContent = 'Swipe right to Complete Pickup >>';
+            document.getElementById('routeSwipeHandle').className = 'w-12 h-12 bg-blue-500 hover:bg-blue-600 rounded-xl flex items-center justify-center text-white cursor-grab active:cursor-grabbing transition-all glow-blue z-20';
+            document.getElementById('routeSwipeIcon').className = 'fa-solid fa-angles-right text-lg animate-pulse';
+
+            // Reset active route swiper position
+            const routeSwipeHandle = document.getElementById('routeSwipeHandle');
+            routeSwipeHandle.style.transition = 'none';
+            routeSwipeHandle.style.transform = 'translateX(0px)';
+
+            // Build active checklist interactively
+            buildActiveChecklist();
+
+            initMap();
+            showToast("Dispatch Accepted", "Travel immediately to store to collect items.");
+        }
+
+        // Build checklist items for verification phase
+        function buildActiveChecklist() {
+            const container = document.getElementById('interactiveChecklist');
+            container.innerHTML = '';
+            
+            state.orderData.verifiedItems = 0;
+            updateChecklistCount();
+
+            state.orderData.items.forEach((item, index) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200/50 rounded-xl cursor-pointer hover:bg-slate-100/75 transition-colors select-none';
+                row.id = `item-row-${index}`;
+                
+                // Clicking checks/unchecks the item
+                row.onclick = () => toggleChecklistItem(index);
+
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <div id="check-icon-${index}" class="w-5 h-5 rounded-md border-2 border-slate-300 bg-white flex items-center justify-center text-white transition-colors">
+                            <i class="fa-solid fa-check text-xs"></i>
+                        </div>
+                        <div>
+                            <p id="item-text-${index}" class="font-semibold text-slate-800 transition-all">${item.name}</p>
+                            <span class="text-[9px] text-slate-400 font-medium">${item.type}</span>
+                        </div>
+                    </div>
+                    <span class="font-extrabold text-slate-500">x${item.qty}</span>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Toggle verification checkmark
+        function toggleChecklistItem(idx) {
+            const checkBox = document.getElementById(`check-icon-${idx}`);
+            const textLine = document.getElementById(`item-text-${idx}`);
+            const rowBox = document.getElementById(`item-row-${idx}`);
+            
+            const isChecked = checkBox.classList.contains('bg-[#0d8368]');
+            playChime('click');
+
+            if (!isChecked) {
+                // Check the item
+                checkBox.classList.remove('bg-white', 'border-slate-300');
+                checkBox.classList.add('bg-[#0d8368]', 'border-[#0d8368]');
+                textLine.classList.add('checked-item-line');
+                rowBox.classList.add('bg-emerald-50/40', 'border-emerald-100');
+                state.orderData.verifiedItems++;
+            } else {
+                // Uncheck the item
+                checkBox.classList.remove('bg-[#0d8368]', 'border-[#0d8368]');
+                checkBox.classList.add('bg-white', 'border-slate-300');
+                textLine.classList.remove('checked-item-line');
+                rowBox.classList.remove('bg-emerald-50/40', 'border-emerald-100');
+                state.orderData.verifiedItems--;
+            }
+            updateChecklistCount();
+        }
+
+        // Update checklist total items verified counter
+        function updateChecklistCount() {
+            const countLabel = document.getElementById('checklistProgress');
+            const total = state.orderData.items.length;
+            countLabel.textContent = `${state.orderData.verifiedItems}/${total} Verified`;
+
+            if (state.orderData.verifiedItems === total) {
+                countLabel.className = 'px-2 py-0.5 bg-emerald-500 text-white text-[9px] font-black rounded-full animate-bounce';
+            } else {
+                countLabel.className = 'px-2 py-0.5 bg-[#0d8368]/15 text-[#0d8368] text-[9px] font-black rounded-full';
+            }
+        }
+
+        // ADVANCE ALONG TRIP STEPS
+        function advanceRouteStep() {
+            const total = state.orderData.items.length;
+            if (state.orderState === 'accepted' && state.orderData.verifiedItems < total) {
+                // Rider has not completed checking items - Warn them logically
+                playChime('error');
+                showToast("Unverified Items!", `Please tap and verify all ${total} items with the merchant before swiping.`);
+                
+                const sliderHandle = document.getElementById('routeSwipeHandle');
+                sliderHandle.style.transition = 'all 0.25s ease-out';
+                sliderHandle.style.transform = 'translateX(0px)';
+                return;
+            }
+
+            playChime('success');
+            
+            const sliderHandle = document.getElementById('routeSwipeHandle');
+            sliderHandle.style.transition = 'all 0.25s ease-out';
+            sliderHandle.style.transform = 'translateX(0px)';
+            
+            if (state.orderState === 'accepted') {
+                // Collect goods and head to drop phase
+                state.orderState = 'picked_up';
+                
+                document.getElementById('navigationPhaseIcon').className = 'w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-[#0d8368] animate-pulse';
+                document.getElementById('navigationPhaseIcon').innerHTML = '<i class="fa-solid fa-location-dot text-lg"></i>';
+                
+                document.getElementById('routePhaseLabel').textContent = 'Phase 2: Travel to Customer';
+                document.getElementById('routePhaseLabel').className = 'text-[9px] font-extrabold text-emerald-600 tracking-wider uppercase';
+                
+                document.getElementById('routeActionTitle').textContent = 'Deliver to Customer Residence';
+                
+                if (state.orderData.paymentMode === 'COD') {
+                    document.getElementById('routeActionSubtitle').textContent = `Collect Cash: ৳${state.orderData.codAmount}`;
+                    document.getElementById('routeActionSubtitle').className = 'text-[10px] text-orange-600 font-bold';
+                } else {
+                    document.getElementById('routeActionSubtitle').textContent = 'Do not collect any Cash';
+                    document.getElementById('routeActionSubtitle').className = 'text-[10px] text-sky-600 font-bold';
+                }
+                
+                if (state.orderData.paymentMode === 'COD') {
+                    document.getElementById('currentPhaseAddress').textContent = 'Lakeview Apartments, Road 15';
+                } else {
+                    document.getElementById('currentPhaseAddress').textContent = 'House 42, Road 8/A (Near Satmasjid Road)';
+                }
+                document.getElementById('dropInstructionContainer').classList.remove('hidden');
+                
+                // Real application verification step: Hide standard slider, show security pin validation
+                document.getElementById('routeSwipeContainer').classList.add('hidden');
+                document.getElementById('deliveryOtpSection').classList.remove('hidden');
+                
+                showToast("Order Packets Collected", "Travel to dropoff. Check customer special notes.");
+            }
+        }
+
+        // VERIFY PIN CODE AND SUBMIT ORDER
+        function verifyAndSubmitOtp() {
+            const inputVal = document.getElementById('otpInput').value;
+            
+            if (inputVal === state.orderData.customerOtp) {
+                // OTP match successful - Process transaction completion
+                playChime('success');
+                
+                state.orderState = 'searching';
+                state.earningsToday += state.orderData.payoutRate;
+                state.tripsCount++;
+                
+                // Add to float cash balance if order was Cash on Delivery
+                if (state.orderData.paymentMode === 'COD') {
+                    state.cashInHand += state.orderData.codAmount;
+                }
+                
+                document.getElementById('earningsDisplay').textContent = `৳${state.earningsToday}`;
+                document.getElementById('tripsDisplay').textContent = String(state.tripsCount).padStart(2, '0');
+                
+                document.getElementById('activeRouteContainer').classList.add('hidden');
+                document.getElementById('onlineStateContainer').classList.remove('hidden');
+                
+                // Reset inputs
+                document.getElementById('otpInput').value = '';
+                
+                updateFloatLimitUI();
+                showToast("Delivery Completed", `Payment added. +৳${state.orderData.payoutRate} recorded.`);
+            } else {
+                // Invalid Pin entered
+                playChime('error');
+                showToast("Wrong OTP Code", "Invalid customer handover PIN. Ask the customer for PIN: " + state.orderData.customerOtp);
+            }
+        }
+
+        // TRIGGER SURGE RATES CONTROLS
+        function toggleSurge() {
+            playChime('click');
+            state.isSurgeActive = !state.isSurgeActive;
+            const banner = document.getElementById('alertBanner');
+            const btn = document.getElementById('surgeBtnText');
+            
+            if (state.isSurgeActive) {
+                banner.classList.remove('hidden');
+                btn.textContent = "Monsoon Bonus Active";
+                btn.parentElement.classList.add('bg-amber-500/15', 'border-amber-400');
+            } else {
+                banner.classList.add('hidden');
+                btn.textContent = "Monsoon Rain Alert";
+                btn.parentElement.classList.remove('bg-amber-500/15', 'border-amber-400');
+            }
+        }
+
+        // TRIGGER HELP MENU
+        function triggerHelpMenu() {
+            playChime('click');
+            showToast("Support Contacted", "Initiating dispatcher support call line.");
+        }
+
+        // SWITCH TAB MENUS SYSTEM
+        function switchTab(tabId) {
+            playChime('click');
+            state.currentTab = tabId;
+            
+            document.getElementById('homeScreen').classList.add('hidden');
+            document.getElementById('heatmapScreen').classList.add('hidden');
+            document.getElementById('earningsScreen').classList.add('hidden');
+            document.getElementById('profileScreen').classList.add('hidden');
+            
+            const tabs = ['home', 'heatmap', 'earnings', 'profile'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`${t}TabBtn`);
+                btn.className = 'flex flex-col items-center gap-1 text-slate-400 transition-colors focus:outline-none';
+                btn.querySelector('span').className = 'text-[10px] font-semibold';
+            });
+
+            document.getElementById(`${tabId}Screen`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`${tabId}TabBtn`);
+            activeBtn.className = 'flex flex-col items-center gap-1 text-[#0d8368] transition-colors focus:outline-none';
+            activeBtn.querySelector('span').className = 'text-[10px] font-bold';
+
+            if (tabId === 'heatmap') {
+                initHeatmap();
+            }
+        }
+
+        // Live Nav Route Canvas rendering pipeline (Adjusted to Light Mode visual themes)
+        let mapAnimationId = null;
+        let mapProgress = 0;
+        function initMap() {
+            const canvas = document.getElementById('liveMapCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.parentElement.clientWidth * dpr;
+            canvas.height = canvas.parentElement.clientHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            mapProgress = 0;
+            if (mapAnimationId) cancelAnimationFrame(mapAnimationId);
+
+            function drawMapFrame() {
+                const w = canvas.width / dpr;
+                const h = canvas.height / dpr;
+                
+                // Light mode off-white background
+                ctx.fillStyle = '#f8fafc'; 
+                ctx.fillRect(0, 0, w, h);
+
+                // Grid city block borders
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 4;
+                
+                const streets = [
+                    {x1: 20, y1: 20, x2: 20, y2: h - 20},
+                    {x1: 140, y1: 20, x2: 140, y2: h - 20},
+                    {x1: 260, y1: 20, x2: 260, y2: h - 20},
+                    {x1: 20, y1: 40, x2: w - 20, y2: 40},
+                    {x1: 20, y1: 100, x2: w - 20, y2: 100}
+                ];
+                
+                streets.forEach(line => {
+                    ctx.beginPath();
+                    ctx.moveTo(line.x1, line.y1);
+                    ctx.lineTo(line.x2, line.y2);
+                    ctx.stroke();
+                });
+
+                const rider = state.orderData.riderCoords;
+                const store = state.orderData.storeCoords;
+                const customer = state.orderData.customerCoords;
+
+                let targetPoint = (state.orderState === 'accepted') ? store : customer;
+                let startPoint = (state.orderState === 'accepted') ? rider : store;
+
+                mapProgress += 0.002;
+                if (mapProgress > 1) mapProgress = 1;
+
+                let currentRiderPos = { x: startPoint.x, y: startPoint.y };
+                if (mapProgress < 0.5) {
+                    currentRiderPos.x = startPoint.x + (targetPoint.x - startPoint.x) * (mapProgress * 2);
+                    currentRiderPos.y = startPoint.y;
+                } else {
+                    currentRiderPos.x = targetPoint.x;
+                    currentRiderPos.y = startPoint.y + (targetPoint.y - startPoint.y) * ((mapProgress - 0.5) * 2);
+                }
+
+                // Drawing routing paths (Highlights matched with theme actions)
+                ctx.strokeStyle = (state.orderState === 'accepted') ? '#3b82f6' : '#0d8368';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(startPoint.x, startPoint.y);
+                ctx.lineTo(targetPoint.x, startPoint.y);
+                ctx.lineTo(targetPoint.x, targetPoint.y);
+                ctx.stroke();
+
+                // Draw Dark Store node
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(store.x, store.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#1e293b';
+                ctx.font = 'bold 9px Inter';
+                ctx.fillText('Store', store.x - 12, store.y - 12);
+
+                // Draw Customer node
+                ctx.fillStyle = '#0d8368'; // Brand green
+                ctx.beginPath();
+                ctx.arc(customer.x, customer.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.fillStyle = '#1e293b';
+                ctx.font = 'bold 9px Inter';
+                ctx.fillText('Customer', customer.x - 20, customer.y - 12);
+
+                // Pulse indicator represent Rider transit position on Map
+                ctx.fillStyle = '#f59e0b';
+                ctx.beginPath();
+                ctx.arc(currentRiderPos.x, currentRiderPos.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                if (state.orderState === 'accepted' || state.orderState === 'picked_up') {
+                    mapAnimationId = requestAnimationFrame(drawMapFrame);
+                }
+            }
+
+            drawMapFrame();
+        }
+
+        // Live Heatmap Canvas rendering pipeline
+        let heatmapAnimationId = null;
+        function initHeatmap() {
+            const canvas = document.getElementById('demandMapCanvas');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.parentElement.clientWidth * dpr;
+            canvas.height = canvas.parentElement.clientHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            if (heatmapAnimationId) cancelAnimationFrame(heatmapAnimationId);
+
+            let pulseVal = 0;
+            function drawHeatmapFrame() {
+                const w = canvas.width / dpr;
+                const h = canvas.height / dpr;
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(0, 0, w, h);
+
+                // Grid street map lines
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 2.5;
+                for (let i = 20; i < w; i += 40) {
+                    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
+                }
+                for (let j = 20; j < h; j += 40) {
+                    ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(w, j); ctx.stroke();
+                }
+
+                pulseVal += 0.04;
+                const pulseScale = 1 + Math.sin(pulseVal) * 0.15;
+
+                // Demand hotspot circles drawing logic
+                const hotspots = [
+                    { x: w * 0.3, y: h * 0.4, r: 45, color: 'rgba(239, 68, 68, 0.18)', border: 'rgba(239, 68, 68, 0.45)', text: 'Satmasjid Rd +৳35' },
+                    { x: w * 0.7, y: h * 0.6, r: 60, color: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.4)', text: 'Green Road +৳15' }
+                ];
+
+                hotspots.forEach(spot => {
+                    const grad = ctx.createRadialGradient(spot.x, spot.y, 2, spot.x, spot.y, spot.r * pulseScale);
+                    grad.addColorStop(0, spot.border);
+                    grad.addColorStop(0.5, spot.color);
+                    grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(spot.x, spot.y, spot.r * pulseScale, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 9px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(spot.text, spot.x, spot.y + 3);
+                });
+
+                // User current location indicator dot
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(w * 0.25, h * 0.75, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.fillStyle = '#3b82f6';
+                ctx.font = 'bold 8px Inter';
+                ctx.fillText('Your Position', w * 0.25, h * 0.75 - 10);
+
+                if (state.currentTab === 'heatmap') {
+                    heatmapAnimationId = requestAnimationFrame(drawHeatmapFrame);
+                }
+            }
+
+            drawHeatmapFrame();
+        }
+
+        // Recentering GPS trigger simulation action
+        function recenterMap() {
+            playChime('click');
+            showToast("GPS Recentered", "Positioned view back to Rider's current coordinates.");
+        }
+
+        // APP INIT EVENT TRIGGERS
+        window.onload = function() {
+            setupSwipers();
+            setupRouteSwiper();
+            updateFloatLimitUI();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# Windows
+desktop.ini
+Thumbs.db
+$RECYCLE.BIN/
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
