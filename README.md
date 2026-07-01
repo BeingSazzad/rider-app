@@ -13,8 +13,10 @@ Just open **[`chutkima_rider_app.html`](chutkima_rider_app.html)** in a browser 
 - **Auth** — Sign In (phone OTP) + 5-step **Sign Up** (phone → OTP → personal → vehicle → KYC documents)
 - **Orders** — online/offline + "On Delivery" status, assigned-order list, **incoming popup with Confirm / Reject**
 - **Order detail** — Order Journey timeline (Order Placed → Packing → Picked Up → On the Way → Arrived → Delivered) with timestamps, live GPS map, Pickup→Drop route, customer **Trust Badge**, bill summary, admin note, Help/Report (SOS)
+- **Pickup flow** — after Confirm the order sits in **Packing** until the store marks it **Ready for Pickup** (auto after packing, or via the sim console); only then is *Swipe → Picked Up* enabled
 - **Delivery flow** — swipe step actions, auto "near customer", **COD cash re-confirm**, QR-on-delivery, final delivery confirmation, team (multi-rider) orders
-- **Earnings** — period segmented control (Week/Month/All), mini bar **chart**, fuel (KM × NPR 4), cash-to-deposit
+- **Tracking** — **Store arrival ETA** before pickup and **Customer arrival ETA** after pickup (route chips + trip tile), plus a **Live-tracking-visibility** card (who can see the rider during delivery)
+- **Earnings** — period segmented control (Week/Month/All), mini bar **chart**, three admin-configurable pay models — **Fuel (KM × NPR 4)**, **Fixed Salary**, **Commission** — and a **daily cash settlement** flow on the cash-to-deposit card
 - **History** — list + tappable **Delivery Receipt** detail (items, bill, customer review)
 - **Notifications** centre, **Profile** hub (rating + reviews, Assigned Vehicle, Account Details & KYC, Edit Profile, Language NP/EN, security, About/Privacy/T&C/FAQ)
 

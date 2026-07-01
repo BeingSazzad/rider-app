@@ -73,6 +73,18 @@
                 </button>
             </div>
             <button onclick="resetDemo()" class="mt-2 w-full p-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all active:scale-95"><i class="fa-solid fa-rotate-left mr-1.5"></i>Reset Demo</button>
+
+            <!-- store / ops + pay-mode simulation -->
+            <div class="mt-3 pt-3 border-t border-slate-100">
+                <p class="text-[11px] font-bold text-slate-600 mb-2">Store / Ops simulation</p>
+                <button onclick="simParcelReady()" class="w-full p-2.5 bg-slate-50 hover:bg-emerald-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 text-xs font-bold transition-all active:scale-95 text-left flex items-center gap-2"><i class="fa-solid fa-box-open"></i><span class="flex-1">📦 Mark Parcel Ready<span class="block text-[10px] opacity-70 font-medium">Store packed → Ready for Pickup</span></span></button>
+                <p class="text-[11px] font-bold text-slate-600 mt-3 mb-1.5">Earnings mode <span class="font-medium text-slate-400">(admin config)</span></p>
+                <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+                    <button id="pm-fuel"       onclick="setPayMode('fuel')"       class="h-9 rounded-lg border font-bold transition-all">Fuel</button>
+                    <button id="pm-salary"     onclick="setPayMode('salary')"     class="h-9 rounded-lg border font-bold transition-all">Salary</button>
+                    <button id="pm-commission" onclick="setPayMode('commission')" class="h-9 rounded-lg border font-bold transition-all">Commission</button>
+                </div>
+            </div>
         </div>
 
         <div class="border-t border-slate-100 pt-4 text-xs text-slate-500 space-y-2.5">
@@ -336,8 +348,11 @@
             <!-- ---------- TAB: EARNINGS (114D, 115A, 115B) ---------- -->
             <div id="tab-earnings" class="hidden-screen flex-1 flex-col overflow-y-auto no-scrollbar px-5 pt-3 pb-24">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-xl font-extrabold text-slate-800">My Earnings</h3>
-                    <span class="text-[11px] text-slate-400 font-semibold">NPR 4 / km · 115B</span>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-xl font-extrabold text-slate-800">My Earnings</h3>
+                        <span id="earnModePill" class="px-2 py-0.5 text-[10px] font-bold bg-brand/10 text-brand rounded-md uppercase tracking-wide">Fuel</span>
+                    </div>
+                    <span id="earnRateLabel" class="text-[11px] text-slate-400 font-semibold">NPR 4 / km · 115B</span>
                 </div>
 
                 <!-- period segmented control -->
@@ -392,6 +407,9 @@
                     <div class="flex justify-between text-sm py-1 border-b border-slate-100"><span class="text-slate-500">Cash collected (COD)</span><span class="font-bold text-slate-800">NPR <span id="codCollected">0</span></span></div>
                     <div class="flex justify-between text-sm py-1 border-b border-slate-100"><span class="text-slate-500">COD orders done</span><span class="font-bold text-slate-800"><span id="codOrders">0</span></span></div>
                     <div class="flex justify-between text-sm py-1"><span class="text-slate-500">Digital (QR) collected</span><span class="font-bold text-slate-800">NPR <span id="qrCollected">0</span></span></div>
+                    <!-- daily settlement action (114D) -->
+                    <div id="settleDoneNote" class="hidden mt-3 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs text-emerald-700"><i class="fa-solid fa-circle-check"></i><span>Last settled <strong id="settleLastAmt">NPR 0</strong> at <span id="settleLastTime">—</span></span></div>
+                    <button id="settleBtn" onclick="openSettle()" class="mt-3 w-full h-12 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-extrabold flex items-center justify-center gap-2 active:scale-[.98] transition-all"><i class="fa-solid fa-hand-holding-dollar"></i> Settle / Deposit Cash</button>
                 </div>
             </div>
 
@@ -616,6 +634,19 @@
                 <!-- delivery progress stepper -->
                 <div id="detailStepper" class="hidden bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm mb-3"></div>
 
+                <!-- live tracking visibility (113D) — who can see the rider live -->
+                <div id="liveTrack" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-3 mb-3 flex items-center gap-3">
+                    <div class="relative w-9 h-9 flex items-center justify-center flex-shrink-0">
+                        <div class="absolute inset-0 bg-emerald-400/30 rounded-full animate-ping"></div>
+                        <div class="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-[11px]"><i class="fa-solid fa-location-arrow"></i></div>
+                    </div>
+                    <div class="flex-1">
+                        <h5 class="text-sm font-bold text-emerald-800">Live tracking ON</h5>
+                        <p class="text-[11px] text-emerald-600 leading-tight">Customer &amp; store can see your location · updating every 10s</p>
+                    </div>
+                    <span class="px-2 py-0.5 text-[10px] font-extrabold bg-emerald-500 text-white rounded-md">LIVE</span>
+                </div>
+
                 <!-- live map (after pickup) -->
                 <div id="detailMap" class="hidden relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-inner h-36 mb-3">
                     <canvas id="mapCanvas" class="w-full h-full block bg-slate-100"></canvas>
@@ -627,7 +658,7 @@
                 <!-- trip summary -->
                 <div class="grid grid-cols-3 gap-2.5 mb-3">
                     <div class="bg-white border border-slate-200/60 p-2.5 rounded-2xl text-center shadow-sm"><span class="text-[9px] text-slate-400 font-bold uppercase block">Distance</span><span class="text-sm font-black text-slate-800 mt-0.5 block"><span id="detailKm">0</span> km</span></div>
-                    <div class="bg-white border border-slate-200/60 p-2.5 rounded-2xl text-center shadow-sm"><span class="text-[9px] text-slate-400 font-bold uppercase block">ETA</span><span class="text-sm font-black text-brand mt-0.5 block">~<span id="detailEta">0</span> min</span></div>
+                    <div class="bg-white border border-slate-200/60 p-2.5 rounded-2xl text-center shadow-sm"><span id="detailEtaLabel" class="text-[9px] text-slate-400 font-bold uppercase block">ETA · Store</span><span class="text-sm font-black text-brand mt-0.5 block">~<span id="detailEta">0</span> min</span></div>
                     <div class="bg-white border border-slate-200/60 p-2.5 rounded-2xl text-center shadow-sm"><span class="text-[9px] text-slate-400 font-bold uppercase block">Items</span><span id="detailTripItems" class="text-sm font-black text-slate-800 mt-0.5 block">0</span></div>
                 </div>
 
@@ -639,7 +670,10 @@
                             <div class="w-[2px] flex-1 min-h-[26px] border-l-2 border-dashed border-slate-200"></div>
                         </div>
                         <div class="flex-1 -mt-0.5">
-                            <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider">Pickup</span>
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider">Pickup</span>
+                                <span id="detailStoreEta" class="px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-600 rounded-md whitespace-nowrap"><i class="fa-regular fa-clock"></i> ~0 min to store</span>
+                            </div>
                             <h4 id="detailStore" class="text-sm font-bold text-slate-800">Chutkima Store — Traffic Chowk</h4>
                             <p id="detailStoreAddr" class="text-xs text-slate-500">Traffic Chowk, Butwal-8</p>
                         </div>
@@ -653,6 +687,7 @@
                             </div>
                             <h4 id="detailCustomer" class="text-base font-bold text-slate-800">Ram Sharma</h4>
                             <p id="detailAddress" class="text-xs text-slate-500 leading-snug">Amarpath · House 42</p>
+                            <span id="detailCustEta" class="inline-block mt-1 px-2 py-0.5 text-[10px] font-bold bg-brand/10 text-brand rounded-md whitespace-nowrap"><i class="fa-regular fa-clock"></i> ~0 min to customer</span>
                             <div id="detailInstruction" class="hidden mt-2 p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-800"><i class="fa-solid fa-circle-info mr-1"></i><span></span></div>
                         </div>
                     </div>
@@ -702,6 +737,11 @@
                 <div id="confirmReject" class="hidden grid grid-cols-2 gap-3">
                     <button onclick="rejectOrder()" class="h-14 rounded-2xl bg-white border-2 border-rose-200 text-rose-600 text-base font-extrabold active:scale-[.98] transition-all"><i class="fa-solid fa-xmark mr-2"></i>Reject</button>
                     <button onclick="confirmOrder()" class="h-14 rounded-2xl bg-brand hover:bg-brand-dark text-white text-base font-extrabold active:scale-[.98] transition-all glow-brand"><i class="fa-solid fa-check mr-2"></i>Confirm</button>
+                </div>
+                <!-- waiting for store to pack the parcel (Ready for Pickup gate) -->
+                <div id="packingWait" class="hidden w-full h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center gap-3 text-amber-700">
+                    <i class="fa-solid fa-box-open animate-pulse"></i>
+                    <span class="text-sm font-bold">Store is packing your parcel…</span>
                 </div>
                 <!-- swipe action -->
                 <div id="swipeTrack" class="relative bg-slate-200 rounded-2xl h-14 flex items-center p-1 overflow-hidden select-none">
@@ -953,6 +993,31 @@
             </div>
         </div>
 
+        <!-- ===================== OVERLAY: DAILY CASH SETTLEMENT (114D) ===================== -->
+        <div id="overlay-settle" class="absolute inset-0 z-[56] hidden">
+            <div class="absolute inset-0 bg-black/50" onclick="closeSettle()"></div>
+            <div id="settleSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 pb-7 fade translate-y-full">
+                <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+                <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-3"><i class="fa-solid fa-hand-holding-dollar text-xl"></i></div>
+                <h3 class="text-xl font-extrabold text-slate-800 text-center">Daily Cash Settlement</h3>
+                <p class="text-sm text-slate-500 mt-1 text-center">Hand the collected COD cash to the store / admin.</p>
+                <div class="bg-orange-50 border border-orange-200 rounded-2xl p-4 text-center my-4">
+                    <span class="text-xs font-bold text-orange-600 uppercase">Cash to hand over</span>
+                    <h2 class="text-4xl font-black text-orange-700 mt-1">NPR <span id="settleAmt">0</span></h2>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-3 space-y-1.5 mb-4">
+                    <div class="flex justify-between text-sm"><span class="text-slate-500">COD cash collected</span><span class="font-bold text-slate-800">NPR <span id="settleCash">0</span></span></div>
+                    <div class="flex justify-between text-sm"><span class="text-slate-500">COD orders</span><span class="font-bold text-slate-800"><span id="settleOrders">0</span></span></div>
+                    <div class="flex justify-between text-sm"><span class="text-slate-500">Digital (QR) — auto-settled</span><span class="font-bold text-emerald-600">NPR <span id="settleQr">0</span></span></div>
+                </div>
+                <label class="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl text-sm font-medium text-slate-700 cursor-pointer">
+                    <input type="checkbox" id="settleConfirm" class="w-5 h-5 accent-orange-600"> I handed over the full cash amount
+                </label>
+                <button onclick="confirmSettle()" class="mt-4 w-full h-14 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white text-base font-extrabold active:scale-[.98] transition-all"><i class="fa-solid fa-check mr-2"></i>Confirm Deposit</button>
+                <button onclick="closeSettle()" class="w-full h-11 text-slate-500 text-sm font-bold mt-2">Cancel</button>
+            </div>
+        </div>
+
         <!-- ===================== OVERLAY: FINAL DELIVERY CONFIRMATION (113C) ===================== -->
         <div id="overlay-delivered" class="absolute inset-0 z-[57] hidden">
             <div class="absolute inset-0 bg-black/50" onclick="closeDeliveredConfirm()"></div>
@@ -1077,7 +1142,11 @@
         activeId: null,     // order open in detail
         seq: 42,
         stats: { delivered: 0, km: 0, cash: 0, codOrders: 0, qr: 0 },
-        gpsTimer: null, arrivedTimer: null
+        gpsTimer: null, arrivedTimer: null,
+        // rider pay model (admin-configured): fuel = KM×rate, salary = fixed monthly, commission = per delivery
+        pay: { mode:'fuel', fuelRate:4, monthlySalary:18000, commissionRate:25 },
+        settlements: [], lastSettle: null,   // daily COD cash settlement history
+        packingTimers: {}                     // per-order "store packing → ready" timers
     };
 
     const AREAS = ['Amarpath, Traffic Chowk','Milanchowk, Butwal','Golpark, Butwal','Devinagar','Sukhanagar','Kalikanagar'];
@@ -1271,7 +1340,11 @@
             phone: '9845012345', items, subtotal, fee, total,
             payment: isCod ? 'COD' : 'Prepaid',
             codAmount: isCod ? total : 0,
-            km, eta: Math.round(km*4 + 4),
+            km,
+            storeEta: 2 + Math.floor(Math.random()*5),   // mins to reach the dark store (pickup)
+            custEta: Math.round(km*4 + 4),                // mins to reach the customer (drop)
+            eta: Math.round(km*4 + 4),
+            storeArrived: false,
             cust: custProfile(),
             status: 'assigned',
             scheduled: type==='Scheduled',
@@ -1313,18 +1386,20 @@
             const locked = o.scheduled;
             const statusChip = locked ? '' : (
                 o.status==='assigned'       ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded-md uppercase"><i class="fa-solid fa-bell"></i> New</span>' :
-                o.status==='confirmed'      ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-700 rounded-md uppercase"><i class="fa-solid fa-check"></i> Confirmed</span>' :
+                o.status==='confirmed'      ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-700 rounded-md uppercase"><i class="fa-solid fa-box-open"></i> Packing</span>' :
+                o.status==='ready'          ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-100 text-emerald-700 rounded-md uppercase"><i class="fa-solid fa-box-open"></i> Ready for pickup</span>' :
                 o.status==='pickedup'       ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-violet-100 text-violet-700 rounded-md uppercase"><i class="fa-solid fa-box"></i> Picked up</span>' :
                 o.status==='outfordelivery' ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded-md uppercase"><i class="fa-solid fa-motorcycle"></i> On the way</span>' :
                 o.status==='arrived'        ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-brand/10 text-brand rounded-md uppercase"><i class="fa-solid fa-location-dot"></i> At customer</span>' : '');
             const actionLabel = locked ? "<i class='fa-solid fa-lock'></i> Locked"
                 : o.status==='assigned'       ? "Confirm / Reject <i class='fa-solid fa-chevron-right ml-1'></i>"
-                : o.status==='confirmed'      ? "Start pickup <i class='fa-solid fa-chevron-right ml-1'></i>"
+                : o.status==='confirmed'      ? "Packing at store… <i class='fa-solid fa-chevron-right ml-1'></i>"
+                : o.status==='ready'          ? "Ready — start pickup <i class='fa-solid fa-chevron-right ml-1'></i>"
                 : o.status==='pickedup'       ? "Out for delivery <i class='fa-solid fa-chevron-right ml-1'></i>"
                 : o.status==='outfordelivery' ? "Continue delivery <i class='fa-solid fa-chevron-right ml-1'></i>"
                 : o.status==='arrived'        ? "Hand over <i class='fa-solid fa-chevron-right ml-1'></i>"
                 : "Continue <i class='fa-solid fa-chevron-right ml-1'></i>";
-            const actionColor = locked ? 'text-violet-500' : (o.status==='assigned' ? 'text-amber-600' : (o.status==='outfordelivery' ? 'text-blue-600' : 'text-brand'));
+            const actionColor = locked ? 'text-violet-500' : (o.status==='assigned' ? 'text-amber-600' : (o.status==='confirmed' ? 'text-amber-600' : (o.status==='outfordelivery' ? 'text-blue-600' : 'text-brand')));
             const itemsCount = o.items.reduce((s,i)=>s+i.qty,0);
             return `
             <div onclick="${locked?'lockedTap()':`openOrder('${o.id}')`}" class="group bg-white border-2 ${locked?'border-violet-200 opacity-90':'border-transparent hover:border-brand'} p-4 rounded-2xl shadow-sm transition-all cursor-pointer active:scale-[.99] ${locked?'':'hover:shadow-md'}">
@@ -1433,7 +1508,8 @@
     function journeyCurrent(status){
         switch(status){
             case 'assigned':       return 1; // Order Placed done; Packing in progress (deciding to accept)
-            case 'confirmed':      return 2; // Packing done; Picked Up next
+            case 'confirmed':      return 1; // accepted; store still packing (Packing in progress)
+            case 'ready':          return 2; // Packing done; Picked Up next
             case 'pickedup':       return 3; // now On Way (Out for Delivery)
             case 'outfordelivery': return 4; // now Arrived
             case 'arrived':        return 5; // now Delivered
@@ -1468,45 +1544,94 @@
         const nr = document.getElementById('btnNotResponding');
         const cr = document.getElementById('confirmReject');
         const swipe = document.getElementById('swipeTrack');
+        const live = document.getElementById('liveTrack');
+        const pack = document.getElementById('packingWait');
         renderStepper(o);
+        updateEtaContext(o);
+        // sensible defaults, then override per status
+        pack.classList.add('hidden');
         if(o.status==='assigned'){
             // driver must Confirm or Reject the assignment (112A)
             pill.textContent = 'Awaiting your confirmation';
-            map.classList.add('hidden'); nr.classList.add('hidden');
+            map.classList.add('hidden'); live.classList.add('hidden'); nr.classList.add('hidden');
             cr.classList.remove('hidden'); swipe.classList.add('hidden');
         } else if(o.status==='confirmed'){
-            pill.textContent = 'Confirmed · go to dark store';
-            map.classList.add('hidden'); nr.classList.add('hidden');
+            // accepted → store is packing; pickup is gated until parcel is Ready
+            pill.textContent = 'Confirmed · store is packing';
+            map.classList.add('hidden'); live.classList.add('hidden'); nr.classList.add('hidden');
+            cr.classList.add('hidden'); swipe.classList.add('hidden'); pack.classList.remove('hidden');
+        } else if(o.status==='ready'){
+            // parcel packed → rider can now pick up
+            pill.textContent = 'Ready for Pickup · collect parcel';
+            map.classList.add('hidden'); live.classList.add('hidden'); nr.classList.add('hidden');
             cr.classList.add('hidden'); swipe.classList.remove('hidden');
             setupSwipe('Swipe → Picked Up (113B)', ()=>doPickup(o), '#0B8570');
         } else if(o.status==='pickedup'){
             pill.textContent = 'Picked up · start delivery';
-            map.classList.remove('hidden'); nr.classList.add('hidden');
+            map.classList.remove('hidden'); live.classList.remove('hidden'); nr.classList.add('hidden');
             cr.classList.add('hidden'); swipe.classList.remove('hidden');
             startGps();
             setupSwipe('Swipe → Out for Delivery', ()=>doOutForDelivery(o), '#7c3aed');
         } else if(o.status==='outfordelivery'){
             pill.textContent = o.nearby ? 'Near customer’s block 📍' : 'On the way to customer';
-            map.classList.remove('hidden'); nr.classList.add('hidden');
+            map.classList.remove('hidden'); live.classList.remove('hidden'); nr.classList.add('hidden');
             cr.classList.add('hidden'); swipe.classList.remove('hidden');
             startGps(); scheduleNearby(o);
             setupSwipe('Swipe → Arrived at doorstep', ()=>doArrived(o), '#3b82f6');
         } else if(o.status==='arrived'){
             pill.textContent = 'Arrived at doorstep · hand over';
-            map.classList.remove('hidden'); nr.classList.remove('hidden');
+            map.classList.remove('hidden'); live.classList.remove('hidden'); nr.classList.remove('hidden');
             cr.classList.add('hidden'); swipe.classList.remove('hidden');
             startGps();
             setupSwipe('Swipe → Hand over & Deliver (113C)', ()=>openDeliver(o), '#0B8570');
         }
     }
 
+    // context-aware ETA: to the store before pickup, to the customer after pickup
+    function updateEtaContext(o){
+        const beforePickup = ['assigned','confirmed','ready'].includes(o.status);
+        const lbl = document.getElementById('detailEtaLabel');
+        const val = document.getElementById('detailEta');
+        if(o.status==='delivered'){ lbl.textContent = 'Delivered'; val.textContent = '—'; }
+        else if(beforePickup){ lbl.textContent = 'ETA · Store'; val.textContent = o.storeEta; }
+        else { lbl.textContent = 'ETA · Customer'; val.textContent = o.custEta; }
+        // route: pickup store ETA → becomes "Picked up" once collected
+        const se = document.getElementById('detailStoreEta');
+        if(beforePickup){ se.className = 'px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-600 rounded-md whitespace-nowrap'; se.innerHTML = '<i class="fa-regular fa-clock"></i> ~'+o.storeEta+' min to store'; }
+        else { se.className = 'px-2 py-0.5 text-[10px] font-bold bg-emerald-50 text-emerald-600 rounded-md whitespace-nowrap'; se.innerHTML = '<i class="fa-solid fa-check"></i> Picked up'; }
+        // route: customer ETA → becomes "Arrived" at the doorstep
+        const ce = document.getElementById('detailCustEta');
+        if(o.status==='arrived'){ ce.className = 'inline-block mt-1 px-2 py-0.5 text-[10px] font-bold bg-brand/10 text-brand rounded-md whitespace-nowrap'; ce.innerHTML = '<i class="fa-solid fa-location-dot"></i> Arrived'; }
+        else { ce.className = 'inline-block mt-1 px-2 py-0.5 text-[10px] font-bold bg-brand/10 text-brand rounded-md whitespace-nowrap'; ce.innerHTML = '<i class="fa-regular fa-clock"></i> ~'+o.custEta+' min to customer'; }
+    }
+
     /* ============================ CONFIRM / REJECT (from Order Detail) ============================ */
     function confirmOrder(){
         const o = cur(); if(!o) return;
         o.status = 'confirmed';
-        if(!o.times.packing) o.times.packing = nowStr(); // packing done by the time rider accepts
+        if(!o.times.packing) o.times.packing = nowStr(); // store starts packing when rider accepts
+        startPackingTimer(o);                             // → auto flips to Ready for Pickup
         renderDetailFooter(o); renderOrders();
-        toast('Order Confirmed ✓','You accepted #'+o.id+'. Proceed to pickup.','fa-check');
+        toast('Order Confirmed ✓','#'+o.id+' accepted — store is packing your parcel.','fa-check');
+    }
+
+    /* ============================ READY FOR PICKUP (parcel packed) ============================ */
+    // in-app state change only — deliberately NO push notification (parcel-ready push is out of scope)
+    function markParcelReady(o){
+        if(!o || o.status!=='confirmed') return false;
+        if(!state.orders.some(x=>x.id===o.id)){ clearTimeout(state.packingTimers[o.id]); delete state.packingTimers[o.id]; return false; }
+        o.status = 'ready';
+        o.times.ready = nowStr();
+        clearTimeout(state.packingTimers[o.id]); delete state.packingTimers[o.id];
+        if(state.activeId===o.id) renderDetailFooter(o);
+        renderOrders();
+        return true;
+    }
+    function startPackingTimer(o){
+        clearTimeout(state.packingTimers[o.id]);
+        state.packingTimers[o.id] = setTimeout(()=>{
+            if(markParcelReady(o)) toast('Parcel Ready 📦','#'+o.id+' is packed — swipe to pick up.','fa-box-open','text-emerald-600');
+        }, 4500);
     }
     function rejectOrder(){ const o = cur(); if(!o) return; openReject(o.id, false); }
 
@@ -1557,8 +1682,10 @@
     function closeIncoming(){ clearInterval(incomingTimer); document.getElementById('overlay-incoming').classList.add('hidden'); }
     function incomingConfirm(){
         const o = state.orders.find(x=>x.id===incomingId); if(!o){ closeIncoming(); return; }
-        o.status = 'confirmed'; if(!o.times.packing) o.times.packing = nowStr(); closeIncoming(); renderOrders();
-        toast('Order Confirmed ✓','#'+o.id+' accepted. Open it to start pickup.','fa-check');
+        o.status = 'confirmed'; if(!o.times.packing) o.times.packing = nowStr();
+        startPackingTimer(o);
+        closeIncoming(); renderOrders();
+        toast('Order Confirmed ✓','#'+o.id+' accepted — store is packing the parcel.','fa-check');
     }
     function incomingReject(){ openReject(incomingId, true); }
 
@@ -1777,15 +1904,63 @@
         cells.forEach(v=>{ const d=document.createElement('div'); d.className='w-full aspect-square rounded-[1px] '+(v?'bg-slate-900':'bg-transparent'); box.appendChild(d); });
     }
 
+    /* ============================ DAILY CASH SETTLEMENT (114D) ============================ */
+    function openSettle(){
+        if(state.stats.cash <= 0){ toast('No cash to settle','No COD cash collected yet today.','fa-circle-info'); return; }
+        document.getElementById('settleAmt').textContent    = state.stats.cash.toLocaleString('en-IN');
+        document.getElementById('settleCash').textContent   = state.stats.cash.toLocaleString('en-IN');
+        document.getElementById('settleOrders').textContent = state.stats.codOrders;
+        document.getElementById('settleQr').textContent     = state.stats.qr.toLocaleString('en-IN');
+        document.getElementById('settleConfirm').checked = false;
+        document.getElementById('overlay-settle').classList.remove('hidden');
+        setTimeout(()=>document.getElementById('settleSheet').classList.remove('translate-y-full'),10);
+    }
+    function closeSettle(){ document.getElementById('settleSheet').classList.add('translate-y-full'); setTimeout(()=>document.getElementById('overlay-settle').classList.add('hidden'),250); }
+    function confirmSettle(){
+        if(!document.getElementById('settleConfirm').checked){ toast('Confirm first','Tick the box to confirm you handed over the cash.','fa-triangle-exclamation','text-amber-500'); return; }
+        const amount = state.stats.cash, orders = state.stats.codOrders, time = nowStr();
+        state.settlements.unshift({ amount, orders, time });
+        state.lastSettle = { amount, time };
+        // physical COD cash handed over → resets; QR is digital and already company-settled
+        state.stats.cash = 0; state.stats.codOrders = 0;
+        closeSettle();
+        renderOrders();                 // refresh header COD-cash mini stat
+        if(state.currentTab==='earnings') renderEarnings();
+        pushNotif('Cash settled', 'Deposited NPR '+amount.toLocaleString('en-IN')+' ('+orders+' COD orders) to the store.', 'fa-hand-holding-dollar', 'text-orange-600');
+        toast('Cash settled ✓','NPR '+amount.toLocaleString('en-IN')+' deposited. Reconciliation cleared.','fa-circle-check');
+    }
+    function renderCashDeposit(){
+        document.getElementById('cashToDeposit').textContent = state.stats.cash.toLocaleString('en-IN');
+        document.getElementById('codCollected').textContent  = state.stats.cash.toLocaleString('en-IN');
+        document.getElementById('codOrders').textContent     = state.stats.codOrders;
+        document.getElementById('qrCollected').textContent   = state.stats.qr.toLocaleString('en-IN');
+        // settled note + settle button state
+        const note = document.getElementById('settleDoneNote');
+        const btn  = document.getElementById('settleBtn');
+        if(state.lastSettle){
+            note.classList.remove('hidden');
+            document.getElementById('settleLastAmt').textContent  = 'NPR '+state.lastSettle.amount.toLocaleString('en-IN');
+            document.getElementById('settleLastTime').textContent = state.lastSettle.time;
+        } else note.classList.add('hidden');
+        const has = state.stats.cash > 0;
+        btn.disabled = !has;
+        btn.className = 'mt-3 w-full h-12 rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 transition-all ' +
+            (has ? 'bg-orange-600 hover:bg-orange-700 text-white active:scale-[.98]' : 'bg-slate-100 text-slate-400 cursor-not-allowed');
+        btn.innerHTML = has
+            ? '<i class="fa-solid fa-hand-holding-dollar"></i> Settle / Deposit Cash'
+            : '<i class="fa-solid fa-circle-check"></i> All cash settled';
+    }
+
     /* ============================ EARNINGS / HISTORY RENDER ============================ */
     let earnPeriod = 'week';
     function setEarnPeriod(p){ earnPeriod = p; renderEarnings(); }
     function renderEarnings(){
-        const today = Math.round(state.stats.km*4);
         const fmt = n => 'NPR ' + Math.round(n).toLocaleString('en-IN');
+        const pay = state.pay;
+        const fuelToday = Math.round(state.stats.km * pay.fuelRate);
 
-        // datasets (mock history + live today rolled into the latest bar)
-        const week  = [{l:'Sun',v:220},{l:'Mon',v:180},{l:'Tue',v:260},{l:'Wed',v:200},{l:'Thu',v:300},{l:'Fri',v:240},{l:'Sat',v:today,now:true}];
+        // base activity datasets (values are fuel NPR; reused / scaled per pay mode)
+        const week  = [{l:'Sun',v:220},{l:'Mon',v:180},{l:'Tue',v:260},{l:'Wed',v:200},{l:'Thu',v:300},{l:'Fri',v:240},{l:'Sat',v:fuelToday,now:true}];
         const weekTotal = week.reduce((s,b)=>s+b.v,0);
         const month = [{l:'W1',v:1180},{l:'W2',v:1320},{l:'W3',v:1090},{l:'W4',v:weekTotal,now:true}];
         const monthTotal = month.reduce((s,b)=>s+b.v,0);
@@ -1793,9 +1968,9 @@
         const allTotal = all.reduce((s,b)=>s+b.v,0);
 
         const CFG = {
-            week:  {title:'This Week',  bars:week,  total:weekTotal,  prev:1180,  deliveries:92+state.stats.delivered,  km:305+state.stats.km,  prevLabel:'last week'},
-            month: {title:'This Month', bars:month, total:monthTotal, prev:3590,  deliveries:380+state.stats.delivered, km:1240+state.stats.km, prevLabel:'last month'},
-            all:   {title:'All-time',   bars:all,   total:allTotal,   prev:0,     deliveries:312,                       km:980,                  prevLabel:''}
+            week:  {title:'This Week',  bars:week,  fuelTotal:weekTotal,  prev:1180, deliveries:92+state.stats.delivered,  km:305+state.stats.km,  prevLabel:'last week',  salaryFactor:1/4.345},
+            month: {title:'This Month', bars:month, fuelTotal:monthTotal, prev:3590, deliveries:380+state.stats.delivered, km:1240+state.stats.km, prevLabel:'last month', salaryFactor:1},
+            all:   {title:'All-time',   bars:all,   fuelTotal:allTotal,   prev:0,    deliveries:312,                       km:980,                  prevLabel:'',           salaryFactor:6}
         };
         const cfg = CFG[earnPeriod];
 
@@ -1804,41 +1979,78 @@
             document.getElementById('seg-'+p).className = 'flex-1 h-9 rounded-lg text-xs font-bold transition-all ' + (p===earnPeriod ? 'bg-white text-brand shadow-sm' : 'text-slate-500');
         });
 
+        // ----- resolve figures per pay mode (fuel / salary / commission) -----
+        let total, bars, sub, heroSuffix, rateLabel, modePill, todayVal, perOrder, showDelta;
+        if(pay.mode === 'salary'){
+            total = Math.round(pay.monthlySalary * cfg.salaryFactor);
+            const n = cfg.bars.length;
+            bars = cfg.bars.map((b,i)=>({ l:b.l, v: Math.round(total/n), now: i===n-1 }));  // fixed pay → flat bars
+            sub = 'Fixed monthly salary · paid by admin';
+            heroSuffix = ' · Fixed Salary';
+            rateLabel = 'Fixed NPR ' + pay.monthlySalary.toLocaleString('en-IN') + '/mo';
+            modePill = 'Salary';
+            todayVal = Math.round(pay.monthlySalary / 30);
+            perOrder = null;
+            showDelta = false;
+        } else if(pay.mode === 'commission'){
+            total = Math.round(cfg.deliveries * pay.commissionRate);
+            const ft = cfg.fuelTotal || 1;
+            bars = cfg.bars.map(b=>({ l:b.l, v: Math.round(b.v / ft * total), now: !!b.now }));  // keep trend shape at commission scale
+            sub = cfg.deliveries + ' deliveries × NPR ' + pay.commissionRate;
+            heroSuffix = ' · Commission';
+            rateLabel = 'NPR ' + pay.commissionRate + ' / delivery';
+            modePill = 'Commission';
+            todayVal = state.stats.delivered * pay.commissionRate;
+            perOrder = pay.commissionRate;
+            showDelta = false;
+        } else { // fuel (default, 115A/115B)
+            total = cfg.fuelTotal;
+            bars = cfg.bars.map(b=>({ l:b.l, v:b.v, now: !!b.now }));
+            sub = cfg.deliveries + ' deliveries · ' + Math.round(cfg.km) + ' km';
+            heroSuffix = ' · Fuel Earnings';
+            rateLabel = 'NPR ' + pay.fuelRate + ' / km · 115B';
+            modePill = 'Fuel';
+            todayVal = fuelToday;
+            perOrder = cfg.deliveries ? Math.round(total / cfg.deliveries) : 0;
+            showDelta = cfg.prev > 0;
+        }
+
+        // header mode pill + rate label
+        document.getElementById('earnModePill').textContent = modePill;
+        document.getElementById('earnRateLabel').textContent = rateLabel;
+
         // hero
-        document.getElementById('earnTitle').textContent = cfg.title + ' · Fuel Earnings';
-        document.getElementById('earnTotal').textContent = Math.round(cfg.total).toLocaleString('en-IN');
-        document.getElementById('earnSub').textContent = cfg.deliveries + ' deliveries · ' + Math.round(cfg.km) + ' km';
+        document.getElementById('earnTitle').textContent = cfg.title + heroSuffix;
+        document.getElementById('earnTotal').textContent = Math.round(total).toLocaleString('en-IN');
+        document.getElementById('earnSub').textContent = sub;
         const deltaEl = document.getElementById('earnDelta');
-        if(cfg.prev > 0){
-            const d = Math.round((cfg.total - cfg.prev) / cfg.prev * 100);
+        if(showDelta){
+            const d = Math.round((total - cfg.prev) / cfg.prev * 100);
             const up = d >= 0;
             deltaEl.style.display = '';
             deltaEl.innerHTML = '<i class="fa-solid fa-arrow-trend-'+(up?'up':'down')+'"></i> '+(up?'+':'')+d+'% vs '+cfg.prevLabel;
         } else { deltaEl.style.display = 'none'; }
 
         // mini bar chart
-        const max = Math.max(...cfg.bars.map(b=>b.v), 1);
-        const avg = cfg.total / cfg.bars.length;
-        document.getElementById('earnChartBars').innerHTML = cfg.bars.map(b=>{
+        const max = Math.max(...bars.map(b=>b.v), 1);
+        const avg = total / bars.length;
+        document.getElementById('earnChartBars').innerHTML = bars.map(b=>{
             const h = Math.max(6, Math.round(b.v / max * 100));
             return '<div class="flex-1 h-full flex items-end"><div class="w-full rounded-t-md '+(b.now?'bg-brand':'bg-brand/25')+'" style="height:'+h+'%" title="'+fmt(b.v)+'"></div></div>';
         }).join('');
-        document.getElementById('earnChartLabels').innerHTML = cfg.bars.map(b=>
+        document.getElementById('earnChartLabels').innerHTML = bars.map(b=>
             '<div class="flex-1 text-center text-[9px] font-bold '+(b.now?'text-brand':'text-slate-400')+'">'+b.l+'</div>'
         ).join('');
         document.getElementById('earnAvg').textContent = fmt(avg);
         document.getElementById('earnBest').textContent = fmt(max);
 
         // micro KPIs
-        document.getElementById('earnToday').textContent = today.toLocaleString('en-IN');
+        document.getElementById('earnToday').textContent = Math.round(todayVal).toLocaleString('en-IN');
         document.getElementById('kmToday2').textContent = state.stats.km.toFixed(1);
-        document.getElementById('earnPerDelivery').textContent = (cfg.deliveries ? Math.round(cfg.total/cfg.deliveries) : 0).toLocaleString('en-IN');
+        document.getElementById('earnPerDelivery').textContent = (perOrder===null ? '—' : Math.round(perOrder).toLocaleString('en-IN'));
 
-        // cash to deposit (company money — not earnings)
-        document.getElementById('cashToDeposit').textContent = state.stats.cash.toLocaleString('en-IN');
-        document.getElementById('codCollected').textContent = state.stats.cash.toLocaleString('en-IN');
-        document.getElementById('codOrders').textContent = state.stats.codOrders;
-        document.getElementById('qrCollected').textContent = state.stats.qr.toLocaleString('en-IN');
+        // cash to deposit + daily settlement (shared across all pay modes)
+        renderCashDeposit();
     }
     function renderHistory(){
         const wrap = document.getElementById('historyList');
@@ -2018,9 +2230,34 @@
         pushNotif('Scheduled orders active', sched.length+' scheduled order(s) activated at 7:00 AM.', 'fa-bolt', 'text-violet-500');
         toast('7:00 AM Cron ⏰','Scheduled orders activated & moved to queue.','fa-bolt');
     }
+    // store packs the parcel → order becomes Ready for Pickup (simulates admin/packer action)
+    function simParcelReady(){
+        if(document.getElementById('screen-app').classList.contains('hidden-screen')){ toast('Login first','Open the app first.','fa-triangle-exclamation','text-amber-500'); return; }
+        const packing = state.orders.filter(o=>o.status==='confirmed');
+        if(packing.length===0){ toast('Nothing packing','Confirm an assigned order first.','fa-circle-info'); return; }
+        packing.forEach(o=>markParcelReady(o));
+        toast('Parcel Ready 📦', packing.length+' order(s) packed & ready for pickup.','fa-box-open','text-emerald-600');
+    }
+    // rider pay model selector (admin config): fuel / fixed salary / commission
+    function setPayMode(m){
+        state.pay.mode = m;
+        renderPayModeButtons();
+        if(state.currentTab==='earnings' && !document.getElementById('screen-app').classList.contains('hidden-screen')) renderEarnings();
+        const label = m==='fuel' ? 'Fuel (KM × NPR '+state.pay.fuelRate+')' : m==='salary' ? 'Fixed monthly salary' : 'Per-delivery commission';
+        toast('Earnings mode', label,'fa-sliders','text-brand');
+    }
+    function renderPayModeButtons(){
+        ['fuel','salary','commission'].forEach(x=>{
+            const b = document.getElementById('pm-'+x); if(!b) return;
+            const active = x===state.pay.mode;
+            b.className = 'h-9 rounded-lg border font-bold transition-all ' + (active ? 'bg-brand text-white border-brand' : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-brand');
+        });
+    }
+
     function simCancelActive(){
         if(state.orders.length===0){ toast('No orders','Nothing to cancel.','fa-circle-info'); return; }
         const o = state.orders[0];
+        clearTimeout(state.packingTimers[o.id]); delete state.packingTimers[o.id];
         state.orders = state.orders.filter(x=>x.id!==o.id);
         if(state.activeId===o.id){ state.activeId=null; stopGps(); show('screen-app'); switchTab('orders'); }
         renderOrders();
@@ -2031,9 +2268,11 @@
     }
     function resetDemo(silent){
         stopGps(); state.online=false; state.orders=[]; state.activeId=null; state.seq=42;
+        Object.values(state.packingTimers).forEach(clearTimeout); state.packingTimers={};
+        state.settlements=[]; state.lastSettle=null;
         seedMockData(); // keep mock data populated after reset
         clearInterval(incomingTimer);
-        ['overlay-deliver','overlay-qr','overlay-cash','overlay-delivered','overlay-nr','overlay-team','overlay-logout','overlay-incoming','overlay-reject','overlay-help'].forEach(i=>document.getElementById(i).classList.add('hidden'));
+        ['overlay-deliver','overlay-qr','overlay-cash','overlay-settle','overlay-delivered','overlay-nr','overlay-team','overlay-logout','overlay-incoming','overlay-reject','overlay-help'].forEach(i=>document.getElementById(i).classList.add('hidden'));
         document.getElementById('cancelAlert').classList.add('hidden');
         // reset toggle visuals
         const dot=document.getElementById('toggleDot'),tog=document.getElementById('onlineToggle');
@@ -2066,6 +2305,7 @@
     });
 
     /* boot */
+    renderPayModeButtons();
     goSplash();
     </script>
 </body>
