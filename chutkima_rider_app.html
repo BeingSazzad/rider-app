@@ -1438,6 +1438,15 @@
     ];
     const rnd = a => a[Math.floor(Math.random()*a.length)];
     const npr = n => 'NPR ' + Number(n).toLocaleString('en-IN');
+    
+    function needsOfficeSettlement(h) {
+        if (h.payment === 'COD' && h.method === 'cash') return true;
+        if (h.substitutionAdjustment && h.substitutionAdjustment.status === 'resolved') {
+            const opt = h.substitutionAdjustment.option;
+            if (opt === 'cash_rider' || opt === 'collect_cash') return true;
+        }
+        return false;
+    }
     const ADMIN_NOTES = [
         'Fragile items — handle with care.',
         'Customer requested an extra carry bag.',
@@ -2333,9 +2342,29 @@
         const o = cur(); if(!o) return;
         deliverMethod = method;
         let payLine;
-        if(method==='cash') payLine = '<span class="font-bold text-emerald-600">Cash collected · NPR '+Number(o.codAmount).toLocaleString('en-IN')+'</span>';
-        else if(method==='qr') payLine = '<span class="font-bold text-emerald-600">Paid via QR · NPR '+Number(o.codAmount).toLocaleString('en-IN')+'</span>';
-        else payLine = '<span class="font-bold text-sky-600">Prepaid — no cash</span>';
+        if(method==='cash') {
+            payLine = '<span class="font-bold text-emerald-600">Cash collected · NPR '+Number(o.codAmount).toLocaleString('en-IN')+'</span>';
+        } else if(method==='qr') {
+            payLine = '<span class="font-bold text-emerald-600">Paid via QR · NPR '+Number(o.codAmount).toLocaleString('en-IN')+'</span>';
+        } else {
+            if (o.substitutionAdjustment && o.substitutionAdjustment.status === 'resolved') {
+                const adj = o.substitutionAdjustment;
+                let optLabel = '';
+                if(adj.option === 'wallet') optLabel = 'Wallet Refund';
+                else if(adj.option === 'charge_wallet') optLabel = 'Wallet Charge';
+                else if(adj.option === 'cash_rider') optLabel = 'Cash Refund';
+                else if(adj.option === 'qr_admin') optLabel = 'QR Refund';
+                else if(adj.option === 'collect_cash') optLabel = 'Cash Collection';
+                else if(adj.option === 'collect_qr') optLabel = 'QR Collection';
+                
+                const sign = adj.type === 'excess' ? 'Refunded' : 'Collected';
+                const color = adj.type === 'excess' ? 'text-emerald-600' : 'text-amber-600';
+                
+                payLine = `<div class="text-right"><span class="font-bold text-sky-600">Prepaid Online</span><br><span class="text-xs font-bold ${color}">${sign} NPR ${adj.amount} (${optLabel})</span></div>`;
+            } else {
+                payLine = '<span class="font-bold text-sky-600">Prepaid — no cash</span>';
+            }
+        }
         document.getElementById('deliveredSummary').innerHTML =
             '<div class="flex justify-between"><span class="text-slate-500">Order</span><span class="font-bold text-slate-800">#'+o.id+'</span></div>'+
             '<div class="flex justify-between"><span class="text-slate-500">Customer</span><span class="font-bold text-slate-800">'+o.customer+'</span></div>'+
@@ -2361,7 +2390,7 @@
         state.stats.delivered++; state.stats.km += o.km;
         state.history.unshift({ id:o.id, customer:o.customer, area:o.area, house:o.house, km:o.km, fuel:o.km*4, payment:o.payment, method, time: nowStr(),
             items:o.items.reduce((s,i)=>s+i.qty,0), itemsList:o.items, subtotal:o.subtotal, fee:o.fee, total:o.total,
-            amount:(o.payment==='COD'?o.codAmount:0), times:o.times, rating:null, review:null }); // customer hasn't reviewed yet
+            amount:(o.payment==='COD'?o.codAmount:0), times:o.times, rating:null, review:null, substitutionAdjustment: o.substitutionAdjustment }); // customer hasn't reviewed yet
         state.orders = state.orders.filter(x=>x.id!==o.id);
         state.activeId = null;
         show('screen-app'); switchTab('orders'); renderOrders();
@@ -2423,23 +2452,25 @@
         document.getElementById('settleConfirm').checked = false;
         // populate per-order COD breakdown
         const breakdown = document.getElementById('settleOrderBreakdown');
-        const codDone = state.history.filter(h=>h.payment==='COD' && h.method==='cash' && !h.settled);
+        const codDone = state.history.filter(h=>needsOfficeSettlement(h) && !h.settled);
         if(codDone.length > 0){
             breakdown.innerHTML = codDone.slice(0,6).map(h=>{
                 const idx = state.history.findIndex(x => x.id === h.id);
                 const clickAttr = idx !== -1 ? `onclick="closeSettle(); openHistory(${idx})"` : '';
+                const displayAmt = h.payment === 'COD' ? h.amount : (h.substitutionAdjustment.option === 'cash_rider' ? -h.substitutionAdjustment.amount : h.substitutionAdjustment.amount);
+                const colorClass = displayAmt < 0 ? 'text-rose-700' : 'text-orange-700';
                 return `
                 <div ${clickAttr} class="flex justify-between items-center py-1.5 border-b border-slate-100 cursor-pointer hover:bg-slate-100 px-1 rounded-md transition-colors">
                     <div>
                         <span class="text-xs font-bold text-slate-700">#${h.id} <i class="fa-solid fa-chevron-right text-[8px] text-slate-300 ml-0.5"></i></span>
                         <span class="text-[10px] text-slate-400 ml-1.5">${h.customer}</span>
                     </div>
-                    <span class="text-xs font-extrabold text-orange-700">NPR ${h.amount.toLocaleString('en-IN')}</span>
+                    <span class="text-xs font-extrabold ${colorClass}">NPR ${displayAmt.toLocaleString('en-IN')}</span>
                 </div>`;
             }).join('');
             if(codDone.length > 6) breakdown.innerHTML += `<p class="text-[10px] text-slate-400 pt-1">+ ${codDone.length-6} more orders…</p>`;
         } else {
-            breakdown.innerHTML = '<p class="text-xs text-slate-400 py-1">Today\'s COD orders — see Earnings tab for breakdown.</p>';
+            breakdown.innerHTML = '<p class="text-xs text-slate-400 py-1">Today\'s COD/cash orders — see Earnings tab for breakdown.</p>';
         }
         document.getElementById('overlay-settle').classList.remove('hidden');
         setTimeout(()=>document.getElementById('settleSheet').classList.remove('translate-y-full'),10);
@@ -2449,15 +2480,15 @@
         if(!document.getElementById('settleConfirm').checked){ toast('Confirm first','Tick the box to confirm you handed over the cash.','fa-triangle-exclamation','text-amber-500'); return; }
         const amount = state.stats.cash, orders = state.stats.codOrders, time = nowStr();
         // Record specific orders details included in this deposit
-        const codDone = state.history.filter(h=>h.payment==='COD' && h.method==='cash' && !h.settled);
+        const codDone = state.history.filter(h=>needsOfficeSettlement(h) && !h.settled);
         const orderBreakdown = codDone.map(h=>({
             id: h.id,
             customer: h.customer,
-            amount: h.amount
+            amount: h.payment === 'COD' ? h.amount : (h.substitutionAdjustment.option === 'cash_rider' ? -h.substitutionAdjustment.amount : h.substitutionAdjustment.amount)
         }));
 
-        // Mark COD history items as 'pending settlement'
-        state.history.filter(h=>h.payment==='COD' && h.method==='cash' && !h.settled).forEach(h=>h.pendingSettle=true);
+        // Mark COD/cash history items as 'pending settlement'
+        state.history.filter(h=>needsOfficeSettlement(h) && !h.settled).forEach(h=>h.pendingSettle=true);
         // Pending state: admin hasn't confirmed yet
         state.pendingDeposit = {
             id: 'DEP-' + Math.floor(1000 + Math.random()*9000),
@@ -2537,7 +2568,7 @@
         } else note.classList.add('hidden');
 
         // COD order mini list in earnings card
-        const codDone = state.history.filter(h=>h.payment==='COD' && h.method==='cash' && !h.settled && !h.pendingSettle);
+        const codDone = state.history.filter(h=>needsOfficeSettlement(h) && !h.settled && !h.pendingSettle);
         const listEl = document.getElementById('codOrderList');
         const listBtn = document.getElementById('showCodListBtn');
         if(codDone.length > 0 && !state.pendingDeposit){
@@ -2728,7 +2759,7 @@
                 
                 // Office settlement status visual label
                 let settlementStatusHtml = '';
-                if(h.payment === 'COD' && h.method === 'cash'){
+                if(needsOfficeSettlement(h)){
                     if(h.settled){
                         settlementStatusHtml = `<div class="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center gap-1.5 text-[10px] text-emerald-600 font-bold"><i class="fa-solid fa-circle-check"></i> Deposited to Store Office (Settled)</div>`;
                     } else if(h.pendingSettle){
@@ -2924,7 +2955,8 @@
 
         // Office Settlement confirmation status block
         const setCard = document.getElementById('hdSettlementCard');
-        if(h.payment === 'COD' && h.method === 'cash'){
+        if(needsOfficeSettlement(h)){
+            const settleAmt = h.payment === 'COD' ? h.amount : h.substitutionAdjustment.amount;
             if(h.settled){
                 setCard.className = 'bg-emerald-50 border border-emerald-200 rounded-2xl p-4 shadow-sm mb-3 flex items-center gap-3';
                 setCard.innerHTML = `
@@ -2933,7 +2965,7 @@
                     </div>
                     <div>
                         <h4 class="text-sm font-extrabold text-emerald-800">Deposit Confirmed by Office</h4>
-                        <p class="text-xs text-emerald-600/90 mt-0.5">The collected cash of NPR ${h.amount.toLocaleString('en-IN')} has been safely deposited at Chutkima Store Office.</p>
+                        <p class="text-xs text-emerald-600/90 mt-0.5">The cash adjustment/amount of NPR ${settleAmt.toLocaleString('en-IN')} has been safely deposited/reconciled at store office.</p>
                     </div>`;
             } else if(h.pendingSettle){
                 setCard.className = 'bg-amber-50 border border-amber-200 rounded-2xl p-4 shadow-sm mb-3 flex items-center gap-3';
@@ -2943,7 +2975,7 @@
                     </div>
                     <div>
                         <h4 class="text-sm font-extrabold text-amber-800">Pending Office Confirmation</h4>
-                        <p class="text-xs text-amber-600/90 mt-0.5">NPR ${h.amount.toLocaleString('en-IN')} cash is submitted to office. Awaiting admin approval.</p>
+                        <p class="text-xs text-amber-600/90 mt-0.5">NPR ${settleAmt.toLocaleString('en-IN')} cash is submitted to office. Awaiting admin approval.</p>
                     </div>`;
             } else {
                 setCard.className = 'bg-orange-50 border border-orange-200 rounded-2xl p-4 shadow-sm mb-3 flex items-center gap-3';
@@ -2953,7 +2985,7 @@
                     </div>
                     <div>
                         <h4 class="text-sm font-extrabold text-orange-800">Cash in Bag (Unsettled)</h4>
-                        <p class="text-xs text-orange-600/90 mt-0.5">NPR ${h.amount.toLocaleString('en-IN')} cash collected but not yet deposited at store office.</p>
+                        <p class="text-xs text-orange-600/90 mt-0.5">NPR ${settleAmt.toLocaleString('en-IN')} cash collected/refunded but not yet deposited at store office.</p>
                     </div>`;
             }
         } else {
