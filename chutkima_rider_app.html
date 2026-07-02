@@ -1106,6 +1106,63 @@
             </div>
         </div>
 
+        <!-- ===================== OVERLAY: PARCEL READY ===================== -->
+        <div id="overlay-parcel-ready" class="absolute inset-0 z-[55] hidden">
+            <div class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"></div>
+            <div class="absolute inset-x-5 top-1/2 -translate-y-1/2 bg-white rounded-3xl overflow-hidden shadow-2xl">
+                <!-- header -->
+                <div class="bg-emerald-600 text-white px-5 py-4 flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center text-xl animate-bounce">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-base font-extrabold">Parcel Ready for Pickup! 📦</h3>
+                        <p class="text-xs text-white/80">Store has packed the order — go collect it</p>
+                    </div>
+                </div>
+                <!-- body -->
+                <div class="p-5 space-y-3">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Order <span id="parcelReadyId">#BW-2025-0043</span> &nbsp;·&nbsp; <span id="parcelReadyItems">3</span> items</span>
+
+                    <!-- STEP 1: Fixed Store (Pickup) -->
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-store text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wide block">① Pick Up From (Fixed Store)</span>
+                            <p class="text-sm font-bold text-slate-800 mt-0.5">Chutkima Store</p>
+                            <p class="text-xs text-slate-500">Traffic Chowk, Butwal — always here</p>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Customer delivery address -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-slate-700 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-location-dot text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wide block">② Deliver To (Customer)</span>
+                            <p id="parcelReadyCustomer" class="text-sm font-bold text-slate-800 mt-0.5">Ram Sharma</p>
+                            <p id="parcelReadyAddress" class="text-xs text-slate-500">Amarpath, Butwal</p>
+                        </div>
+                    </div>
+
+                    <!-- Warning -->
+                    <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl flex items-start gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5 flex-shrink-0"></i>
+                        <p class="text-xs text-amber-800">Check parcel seal &amp; item count before leaving the store.</p>
+                    </div>
+                </div>
+                <!-- actions -->
+                <div class="px-5 pb-5">
+                    <button onclick="closeParcelReady()" class="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-base font-extrabold active:scale-[.98] transition-all" style="box-shadow:0 0 18px rgba(5,150,105,.35)">
+                        <i class="fa-solid fa-motorcycle mr-2"></i>Go to Store &amp; Pick Up
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- ===================== OVERLAY: REJECT REASON ===================== -->
         <div id="overlay-reject" class="absolute inset-0 z-[58] hidden">
             <div class="absolute inset-0 bg-black/50" onclick="closeReject()"></div>
@@ -1625,12 +1682,24 @@
         clearTimeout(state.packingTimers[o.id]); delete state.packingTimers[o.id];
         if(state.activeId===o.id) renderDetailFooter(o);
         renderOrders();
+        showParcelReady(o);
         return true;
+    }
+    function showParcelReady(o){
+        document.getElementById('parcelReadyId').textContent = '#'+o.id;
+        document.getElementById('parcelReadyCustomer').textContent = o.customer;
+        document.getElementById('parcelReadyAddress').textContent = o.area + (o.house ? ' · ' + o.house : '');
+        document.getElementById('parcelReadyItems').textContent = o.items.reduce((s,i)=>s+i.qty,0);
+        document.getElementById('overlay-parcel-ready').classList.remove('hidden');
+        pushNotif('Parcel ready for pickup', 'Order #'+o.id+' packed at store · Go collect it.', 'fa-box-open', 'text-emerald-600');
+    }
+    function closeParcelReady(){
+        document.getElementById('overlay-parcel-ready').classList.add('hidden');
     }
     function startPackingTimer(o){
         clearTimeout(state.packingTimers[o.id]);
         state.packingTimers[o.id] = setTimeout(()=>{
-            if(markParcelReady(o)) toast('Parcel Ready 📦','#'+o.id+' is packed — swipe to pick up.','fa-box-open','text-emerald-600');
+            markParcelReady(o);
         }, 4500);
     }
     function rejectOrder(){ const o = cur(); if(!o) return; openReject(o.id, false); }
@@ -2236,7 +2305,6 @@
         const packing = state.orders.filter(o=>o.status==='confirmed');
         if(packing.length===0){ toast('Nothing packing','Confirm an assigned order first.','fa-circle-info'); return; }
         packing.forEach(o=>markParcelReady(o));
-        toast('Parcel Ready 📦', packing.length+' order(s) packed & ready for pickup.','fa-box-open','text-emerald-600');
     }
     // rider pay model selector (admin config): fuel / fixed salary / commission
     function setPayMode(m){
@@ -2272,7 +2340,7 @@
         state.settlements=[]; state.lastSettle=null;
         seedMockData(); // keep mock data populated after reset
         clearInterval(incomingTimer);
-        ['overlay-deliver','overlay-qr','overlay-cash','overlay-settle','overlay-delivered','overlay-nr','overlay-team','overlay-logout','overlay-incoming','overlay-reject','overlay-help'].forEach(i=>document.getElementById(i).classList.add('hidden'));
+        ['overlay-deliver','overlay-qr','overlay-cash','overlay-settle','overlay-delivered','overlay-nr','overlay-team','overlay-logout','overlay-incoming','overlay-reject','overlay-help','overlay-parcel-ready'].forEach(i=>document.getElementById(i).classList.add('hidden'));
         document.getElementById('cancelAlert').classList.add('hidden');
         // reset toggle visuals
         const dot=document.getElementById('toggleDot'),tog=document.getElementById('onlineToggle');
