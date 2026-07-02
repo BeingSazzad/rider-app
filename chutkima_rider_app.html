@@ -52,27 +52,54 @@
 
         <div class="border-t border-slate-100 pt-4">
             <h3 class="text-sm font-bold text-slate-800 mb-3"><i class="fa-solid fa-gamepad mr-2 text-brand"></i>Simulation Console</h3>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-                <button onclick="simAssign('Prepaid')" class="p-3 bg-slate-50 hover:bg-brand hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
-                    <span class="font-bold block">+ Prepaid Order</span><span class="text-[10px] opacity-80">Push new assignment (112A)</span>
+
+            <!-- Core order types -->
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Order Types</p>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                <button onclick="simAssign('COD')" class="p-3 bg-slate-50 hover:bg-orange-500 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[68px] shadow-sm active:scale-95">
+                    <span class="font-bold block">💵 COD Order</span>
+                    <span class="text-[10px] opacity-80">Collect cash on delivery</span>
                 </button>
-                <button onclick="simAssign('COD')" class="p-3 bg-slate-50 hover:bg-orange-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
-                    <span class="font-bold block">+ COD Order</span><span class="text-[10px] opacity-80">Collect cash on delivery</span>
+                <button onclick="simAssign('Prepaid')" class="p-3 bg-slate-50 hover:bg-sky-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[68px] shadow-sm active:scale-95">
+                    <span class="font-bold block">💳 Prepaid Order</span>
+                    <span class="text-[10px] opacity-80">Already paid online</span>
                 </button>
-                <button onclick="simAssign('Scheduled')" class="p-3 bg-slate-50 hover:bg-violet-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
-                    <span class="font-bold block">+ Scheduled</span><span class="text-[10px] opacity-80">Locked until 7:00 AM (112C)</span>
+                <button onclick="simAssign('Scheduled')" class="p-3 bg-slate-50 hover:bg-violet-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[68px] shadow-sm active:scale-95">
+                    <span class="font-bold block">⏰ Scheduled</span>
+                    <span class="text-[10px] opacity-80">Locked until 7:00 AM</span>
                 </button>
-                <button onclick="simAssign('Team')" class="p-3 bg-slate-50 hover:bg-indigo-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
-                    <span class="font-bold block">+ Team Order</span><span class="text-[10px] opacity-80">Multi-rider portion (112D)</span>
-                </button>
-                <button onclick="simActivateScheduled()" class="p-3 bg-slate-50 hover:bg-amber-500 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
-                    <span class="font-bold block">⏰ 7:00 AM Cron</span><span class="text-[10px] opacity-80">Activate scheduled orders</span>
-                </button>
-                <button onclick="simCancelActive()" class="p-3 bg-slate-50 hover:bg-rose-500 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
-                    <span class="font-bold block">✕ Cancel Order</span><span class="text-[10px] opacity-80">Alert on cancellation (112E)</span>
+                <button onclick="simAssign('Team')" class="p-3 bg-slate-50 hover:bg-indigo-600 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col justify-between h-[68px] shadow-sm active:scale-95">
+                    <span class="font-bold block">👥 Team Order</span>
+                    <span class="text-[10px] opacity-80">Multi-rider portion</span>
                 </button>
             </div>
-            <button onclick="resetDemo()" class="mt-2 w-full p-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all active:scale-95"><i class="fa-solid fa-rotate-left mr-1.5"></i>Reset Demo</button>
+
+            <!-- Substitution adjustment scenarios -->
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Substitution Adjustment (Prepaid)</p>
+            <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                <button onclick="simAssignWith('excess')" class="p-3 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-800 rounded-xl border border-emerald-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
+                    <span class="font-bold block">🟢 Excess Cash</span>
+                    <span class="text-[10px] opacity-80">Cheaper item — refund NPR 45 to customer</span>
+                </button>
+                <button onclick="simAssignWith('short')" class="p-3 bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-800 rounded-xl border border-amber-200 transition-all text-left flex flex-col justify-between h-[72px] shadow-sm active:scale-95">
+                    <span class="font-bold block">🟡 Short Cash</span>
+                    <span class="text-[10px] opacity-80">Costlier item — collect NPR 60 from customer</span>
+                </button>
+            </div>
+
+            <!-- Ops controls -->
+            <div class="grid grid-cols-2 gap-2 text-xs mb-2">
+                <button onclick="simActivateScheduled()" class="p-2.5 bg-slate-50 hover:bg-amber-500 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col h-[56px] shadow-sm active:scale-95">
+                    <span class="font-bold block text-[11px]">⏰ 7 AM Cron</span>
+                    <span class="text-[10px] opacity-80">Activate scheduled</span>
+                </button>
+                <button onclick="simCancelActive()" class="p-2.5 bg-slate-50 hover:bg-rose-500 hover:text-white text-slate-700 rounded-xl border border-slate-200 transition-all text-left flex flex-col h-[56px] shadow-sm active:scale-95">
+                    <span class="font-bold block text-[11px]">✕ Cancel Order</span>
+                    <span class="text-[10px] opacity-80">Admin cancellation</span>
+                </button>
+            </div>
+
+            <button onclick="resetDemo()" class="mt-1 w-full p-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all active:scale-95"><i class="fa-solid fa-rotate-left mr-1.5"></i>Reset Demo</button>
 
             <!-- store / ops + pay-mode simulation -->
             <div class="mt-3 pt-3 border-t border-slate-100">
@@ -3043,6 +3070,19 @@
         const o = makeOrder(type); state.orders.unshift(o); renderOrders();
         if(o.scheduled){ toast('Scheduled order added','#'+o.id+' locked until 7:00 AM (112C).','fa-clock','text-violet-500'); }
         else { showIncoming(o); }   // loud assignment popup → Confirm / Reject (112A)
+    }
+    // Force a prepaid order with a guaranteed substitution adjustment type
+    function simAssignWith(adjType){
+        if(document.getElementById('screen-app').classList.contains('hidden-screen')){ toast('Login first','Open the app to receive orders.','fa-triangle-exclamation','text-amber-500'); return; }
+        ensureOnline();
+        const o = makeOrder('Prepaid');
+        o.substitutionAdjustment = {
+            type: adjType,
+            amount: adjType === 'excess' ? 45 : 60,
+            status: 'pending'
+        };
+        state.orders.unshift(o); renderOrders();
+        showIncoming(o);
     }
     function simActivateScheduled(){
         const sched = state.orders.filter(o=>o.scheduled);
