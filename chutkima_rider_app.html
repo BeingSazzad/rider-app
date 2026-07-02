@@ -318,6 +318,7 @@
                         </div>
                         <h3 class="text-lg font-bold text-slate-800">You're Offline</h3>
                         <p class="text-sm text-slate-500 text-center max-w-[260px] mt-2">Turn on duty at the top to start receiving orders assigned by the dark store.</p>
+                        <p id="lastOfflineReason" class="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full mt-3 font-semibold hidden"></p>
                     </div>
 
                     <!-- online: searching / list -->
@@ -1040,12 +1041,31 @@
                 </div>
 
                 <!-- prepaid block -->
-                <div id="deliverPrepaid" class="hidden mt-4">
+                <div id="deliverPrepaid" class="hidden mt-4 space-y-4">
                     <div class="bg-brand-light border border-brand/20 rounded-2xl p-4 text-center">
                         <i class="fa-solid fa-circle-check text-brand text-3xl mb-1"></i>
-                        <p class="text-sm font-bold text-brand-dark">Already paid online — no cash to collect.</p>
+                        <p class="text-sm font-bold text-brand-dark">Prepaid online order.</p>
                     </div>
-                    <button onclick="openDeliveredConfirm('prepaid')" class="mt-4 w-full h-14 rounded-2xl bg-brand hover:bg-brand-dark text-white text-base font-extrabold active:scale-[.98] transition-all">Mark as Delivered (113C)</button>
+
+                    <!-- Substitution Adjustment block (prepaid only) -->
+                    <div id="prepaidAdjBlock" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <span id="prepaidAdjTitle" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Substitution Adjustment</span>
+                            <span id="prepaidAdjAmt" class="text-sm font-extrabold text-slate-800">NPR 0</span>
+                        </div>
+                        
+                        <div id="prepaidAdjStatusPending" class="space-y-2">
+                            <p class="text-xs text-slate-500">Choose how to resolve this adjustment:</p>
+                            <div id="prepaidAdjOptions" class="flex flex-col gap-2"></div>
+                        </div>
+                        
+                        <div id="prepaidAdjStatusResolved" class="hidden text-xs text-emerald-700 font-bold flex items-center gap-1.5 pt-1">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Resolved via: <span id="prepaidAdjResolvedMethod" class="underline"></span></span>
+                        </div>
+                    </div>
+
+                    <button id="btnPrepaidDeliverSubmit" onclick="openDeliveredConfirm('prepaid')" class="w-full h-14 rounded-2xl bg-brand hover:bg-brand-dark text-white text-base font-extrabold active:scale-[.98] transition-all">Mark as Delivered (113C)</button>
                 </div>
             </div>
         </div>
@@ -1332,6 +1352,24 @@
             </div>
         </div>
 
+        <!-- ===================== OVERLAY: OFFLINE REASON ===================== -->
+        <div id="overlay-offline-reason" class="absolute inset-0 z-[58] hidden">
+            <div class="absolute inset-0 bg-black/50" onclick="closeOfflineReason()"></div>
+            <div id="offlineReasonSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl p-5 pb-7 z-[59]">
+                <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+                <h3 class="text-xl font-extrabold text-slate-800 text-center">Going Offline?</h3>
+                <p class="text-sm text-slate-500 mt-1 text-center">Please select a reason for going offline.</p>
+                <div class="space-y-2.5 mt-4">
+                    <button onclick="confirmOfflineReason('End of Shift')" class="w-full h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-bold text-left px-4 transition-colors">End of Shift</button>
+                    <button onclick="confirmOfflineReason('Break')" class="w-full h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-bold text-left px-4 transition-colors">Break</button>
+                    <button onclick="confirmOfflineReason('Fueling')" class="w-full h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-bold text-left px-4 transition-colors">Fueling</button>
+                    <button onclick="confirmOfflineReason('Emergency')" class="w-full h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-bold text-left px-4 transition-colors">Emergency</button>
+                    <button onclick="confirmOfflineReason('Other')" class="w-full h-12 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-bold text-left px-4 transition-colors">Other</button>
+                </div>
+                <button onclick="closeOfflineReason()" class="w-full h-12 text-slate-500 text-sm font-bold mt-3">Cancel</button>
+            </div>
+        </div>
+
         <!-- toast -->
         <div id="toast" class="absolute top-14 left-1/2 -translate-x-1/2 bg-white border-2 border-brand rounded-2xl px-5 py-3 shadow-2xl flex items-center gap-3 z-[60] text-sm fade -translate-y-32 opacity-0 pointer-events-none max-w-[360px]">
             <i id="toastIcon" class="fa-solid fa-circle-check text-brand text-lg"></i>
@@ -1569,7 +1607,14 @@
 
     /* ============================ ONLINE TOGGLE (111B) ============================ */
     function toggleOnline(){
-        state.online = !state.online;
+        if(state.online){
+            document.getElementById('overlay-offline-reason').classList.remove('hidden');
+        } else {
+            setOnlineState(true);
+        }
+    }
+    function setOnlineState(isOnline, reason){
+        state.online = isOnline;
         const dot = document.getElementById('toggleDot'), tog = document.getElementById('onlineToggle');
         const icon = document.getElementById('toggleIcon'), lbl = document.getElementById('onlineLabel'), pd = document.getElementById('presenceDot');
         if(state.online){
@@ -1589,8 +1634,25 @@
             pd.classList.add('bg-slate-400'); pd.classList.remove('bg-brand','animate-pulse');
             document.getElementById('ordersOffline').classList.remove('hidden');
             document.getElementById('ordersOnline').classList.add('hidden');
+            
+            const reasonEl = document.getElementById('lastOfflineReason');
+            if(reason) {
+                state.lastOfflineReason = reason;
+                reasonEl.textContent = 'Last offline reason: ' + reason;
+                reasonEl.classList.remove('hidden');
+            } else {
+                reasonEl.classList.add('hidden');
+            }
         }
         renderOrders();
+    }
+    function closeOfflineReason(){
+        document.getElementById('overlay-offline-reason').classList.add('hidden');
+    }
+    function confirmOfflineReason(reason){
+        closeOfflineReason();
+        setOnlineState(false, reason);
+        toast('Offline Status', 'Went offline: ' + reason, 'fa-power-off', 'text-slate-500');
     }
 
     /* ============================ ORDER FACTORY ============================ */
@@ -1640,6 +1702,15 @@
             times: { confirmed: nowStr() } // Order Placed stamped on creation; Packing stamped when rider confirms
         };
         if(type==='Scheduled'){ o.payment = Math.random()>.5?'COD':'Prepaid'; o.codAmount = o.payment==='COD'? total:0; }
+        if (o.payment === 'Prepaid' && Math.random() > 0.4) {
+            const isExcess = Math.random() > 0.5;
+            const amount = isExcess ? 45 : 60;
+            o.substitutionAdjustment = {
+                type: isExcess ? 'excess' : 'short',
+                amount: amount,
+                status: 'pending'
+            };
+        }
         return o;
     }
     function seedOrders(){ state.orders.push(makeOrder('Prepaid')); state.orders.push(makeOrder('COD')); renderOrders(); }
@@ -1758,6 +1829,38 @@
             '<div class="flex justify-between text-sm py-1 border-b border-slate-100"><span class="text-slate-500">Delivery fee</span><span class="font-semibold '+(o.fee===0?'text-emerald-600':'text-slate-700')+'">'+(o.fee===0?'FREE':npr(o.fee))+'</span></div>'+
             '<div class="flex justify-between text-sm pt-2"><span class="font-bold text-slate-800">Order total</span><span class="font-black text-slate-900">'+npr(o.total)+'</span></div>'+
             codHighlight;
+        if (o.substitutionAdjustment) {
+            const adj = o.substitutionAdjustment;
+            const adjTypeLabel = adj.type === 'excess' ? 'Excess Cash (cheaper substitution)' : 'Short Cash (more expensive substitution)';
+            const adjStatusLabel = adj.status === 'pending' ? 'Pending Resolution' : 'Resolved';
+            const statusColor = adj.status === 'pending' ? 'text-amber-600 bg-amber-50' : 'text-emerald-600 bg-emerald-50';
+            const typeColor = adj.type === 'excess' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-amber-50 text-amber-800 border-amber-200';
+            
+            let resolvedLine = '';
+            if (adj.status === 'resolved') {
+                let optionName = '';
+                if(adj.option === 'wallet') optionName = 'Credit Wallet';
+                else if(adj.option === 'charge_wallet') optionName = 'Charge Wallet';
+                else if(adj.option === 'cash_rider') optionName = 'Cash Refund (Rider)';
+                else if(adj.option === 'qr_admin') optionName = 'QR Refund (Admin)';
+                else if(adj.option === 'collect_cash') optionName = 'Collect Cash';
+                else if(adj.option === 'collect_qr') optionName = 'QR Payment (Rider)';
+                resolvedLine = `<div class="text-[10px] text-slate-500 font-semibold mt-1">Method: <strong>${optionName}</strong></div>`;
+            }
+
+            pay.innerHTML += `
+                <div class="mt-3 p-3 border rounded-xl ${typeColor}">
+                    <div class="flex justify-between items-center font-bold">
+                        <span class="text-xs">${adjTypeLabel}</span>
+                        <span class="text-sm">${npr(adj.amount)}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-200/50">
+                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${statusColor}">${adjStatusLabel}</span>
+                        ${resolvedLine}
+                    </div>
+                </div>
+            `;
+        }
         // items
         document.getElementById('detailItemCount').textContent = o.items.reduce((s,i)=>s+i.qty,0)+' items';
         document.getElementById('detailItems').innerHTML = o.items.map(i=>`
@@ -2094,12 +2197,93 @@
     function openDeliver(o){
         document.getElementById('deliverCod').classList.toggle('hidden', o.payment!=='COD');
         document.getElementById('deliverPrepaid').classList.toggle('hidden', o.payment==='COD');
-        if(o.payment==='COD'){ document.getElementById('deliverCodAmt').textContent = Number(o.codAmount).toLocaleString('en-IN'); document.getElementById('deliverSub').textContent='Collect payment, then mark delivered.'; }
-        else document.getElementById('deliverSub').textContent='Already paid online. Confirm hand-over.';
+        if(o.payment==='COD'){
+            document.getElementById('deliverCodAmt').textContent = Number(o.codAmount).toLocaleString('en-IN');
+            document.getElementById('deliverSub').textContent='Collect payment, then mark delivered.';
+        } else {
+            document.getElementById('deliverSub').textContent='Already paid online. Confirm hand-over.';
+            const prepaidAdjBlock = document.getElementById('prepaidAdjBlock');
+            if (o.substitutionAdjustment) {
+                prepaidAdjBlock.classList.remove('hidden');
+                const adj = o.substitutionAdjustment;
+                document.getElementById('prepaidAdjTitle').textContent = adj.type === 'excess' ? 'Excess Cash (cheaper substitution)' : 'Short Cash (more expensive substitution)';
+                document.getElementById('prepaidAdjAmt').textContent = npr(adj.amount);
+                
+                const btnSubmit = document.getElementById('btnPrepaidDeliverSubmit');
+                
+                if (adj.status === 'pending') {
+                    document.getElementById('prepaidAdjStatusPending').classList.remove('hidden');
+                    document.getElementById('prepaidAdjStatusResolved').classList.add('hidden');
+                    btnSubmit.disabled = true;
+                    btnSubmit.classList.add('opacity-50', 'pointer-events-none');
+                    
+                    const optionsWrap = document.getElementById('prepaidAdjOptions');
+                    if (adj.type === 'excess') {
+                        optionsWrap.innerHTML = `
+                            <button onclick="resolvePrepaidAdj('cash_rider')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Cash Refund (via Rider)</button>
+                            <button onclick="resolvePrepaidAdj('qr_admin')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">QR Refund (via Admin)</button>
+                            <button onclick="resolvePrepaidAdj('wallet')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Add Credit to Customer Wallet</button>
+                        `;
+                    } else {
+                        optionsWrap.innerHTML = `
+                            <button onclick="resolvePrepaidAdj('collect_cash')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Collect Cash from Customer</button>
+                            <button onclick="resolvePrepaidAdj('collect_qr')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Collect via QR Payment (via Rider)</button>
+                            <button onclick="resolvePrepaidAdj('charge_wallet')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Charge Customer Wallet</button>
+                        `;
+                    }
+                } else {
+                    document.getElementById('prepaidAdjStatusPending').classList.add('hidden');
+                    document.getElementById('prepaidAdjStatusResolved').classList.remove('hidden');
+                    let methodLabel = '';
+                    if(adj.option === 'wallet') methodLabel = 'Add Credit to Customer Wallet';
+                    else if(adj.option === 'charge_wallet') methodLabel = 'Charge Customer Wallet';
+                    else if(adj.option === 'cash_rider') methodLabel = 'Cash Refund (via Rider)';
+                    else if(adj.option === 'qr_admin') methodLabel = 'QR Refund (via Admin)';
+                    else if(adj.option === 'collect_cash') methodLabel = 'Collect Cash from Customer';
+                    else if(adj.option === 'collect_qr') methodLabel = 'Collect via QR Payment (via Rider)';
+                    document.getElementById('prepaidAdjResolvedMethod').textContent = methodLabel;
+                    btnSubmit.disabled = false;
+                    btnSubmit.classList.remove('opacity-50', 'pointer-events-none');
+                }
+            } else {
+                prepaidAdjBlock.classList.add('hidden');
+                const btnSubmit = document.getElementById('btnPrepaidDeliverSubmit');
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
         document.getElementById('overlay-deliver').classList.remove('hidden');
         setTimeout(()=>document.getElementById('deliverSheet').classList.remove('translate-y-full'),10);
     }
     function closeDeliver(){ document.getElementById('deliverSheet').classList.add('translate-y-full'); setTimeout(()=>document.getElementById('overlay-deliver').classList.add('hidden'),250); }
+
+    function resolvePrepaidAdj(option) {
+        const o = cur(); if(!o) return;
+        const adj = o.substitutionAdjustment;
+        if (!adj) return;
+        
+        adj.option = option;
+        adj.status = 'resolved';
+        
+        if (option === 'cash_rider') {
+            state.stats.cash = Math.max(0, state.stats.cash - adj.amount);
+            toast('Cash Paid', 'NPR ' + adj.amount + ' refunded to customer from cash bag.', 'fa-money-bill-wave', 'text-rose-500');
+        } else if (option === 'collect_cash') {
+            state.stats.cash += adj.amount;
+            state.stats.codOrders++;
+            toast('Cash Collected', 'NPR ' + adj.amount + ' collected from customer.', 'fa-money-bill-wave', 'text-emerald-500');
+        } else if (option === 'collect_qr') {
+            state.stats.qr += adj.amount;
+            toast('QR Payment Received', 'NPR ' + adj.amount + ' paid via QR code.', 'fa-qrcode', 'text-emerald-500');
+        } else {
+            toast('Resolved Adjustment', 'Resolution submitted: ' + option, 'fa-circle-check');
+        }
+        
+        openDeliver(o);
+        if (state.activeId === o.id) {
+            openOrder(o.id);
+        }
+    }
 
     /* ----- Payment confirmation chain: Cash → re-confirm → Delivery confirm ----- */
     let deliverMethod = null;
