@@ -2005,7 +2005,15 @@
             map.classList.remove('hidden'); live.classList.remove('hidden'); nr.classList.remove('hidden');
             cr.classList.add('hidden'); swipe.classList.remove('hidden');
             startGps();
-            setupSwipe('Swipe → Hand over & Deliver (113C)', ()=>openDeliver(o), '#0B8570');
+            setupSwipe('Swipe → Hand over & Deliver (113C)', ()=>handoverOrder(o), '#0B8570');
+        }
+    }
+    
+    function handoverOrder(o) {
+        if (o.payment === 'Prepaid' && o.substitutionAdjustment && o.substitutionAdjustment.status === 'pending') {
+            openDeliver(o);
+        } else {
+            openDeliveredConfirm(o.payment.toLowerCase());
         }
     }
 
@@ -2321,7 +2329,7 @@
         }
     }
 
-    /* ----- Payment confirmation chain: Cash → re-confirm → Delivery confirm ----- */
+    /* ----- Payment confirmation chain ----- */
     let deliverMethod = null;
     function openCashConfirm(){
         const o = cur(); if(!o) return;
@@ -2334,15 +2342,26 @@
     function confirmCash(){
         if(!document.getElementById('cashReconfirm').checked){ toast('Re-confirm needed','Tick the box to confirm you received the full cash.','fa-triangle-exclamation','text-amber-500'); return; }
         closeCashConfirm();
-        openDeliveredConfirm('cash');
+        closeDeliver();
+        const o = cur();
+        if(o.team){ o.teamRiders[0].done = true; showTeamWait(o, 'cash'); return; }
+        finalizeDelivery(o, 'cash');
     }
-    function qrPaid(){ hideQR(); openDeliveredConfirm('qr'); }
+    function qrPaid(){
+        hideQR();
+        closeDeliver();
+        const o = cur();
+        if(o.team){ o.teamRiders[0].done = true; showTeamWait(o, 'qr'); return; }
+        finalizeDelivery(o, 'qr');
+    }
 
     function openDeliveredConfirm(method){
         const o = cur(); if(!o) return;
         deliverMethod = method;
         let payLine;
-        if(method==='cash') {
+        if(method==='cod') {
+            payLine = '<span class="font-bold text-emerald-600">COD · NPR '+Number(o.codAmount).toLocaleString('en-IN')+'</span>';
+        } else if(method==='cash') {
             payLine = '<span class="font-bold text-emerald-600">Cash collected · NPR '+Number(o.codAmount).toLocaleString('en-IN')+'</span>';
         } else if(method==='qr') {
             payLine = '<span class="font-bold text-emerald-600">Paid via QR · NPR '+Number(o.codAmount).toLocaleString('en-IN')+'</span>';
@@ -2377,9 +2396,15 @@
         const o = cur(); if(!o){ closeDeliveredConfirm(); return; }
         const method = deliverMethod;
         closeDeliveredConfirm();
-        // team order: only close when ALL riders confirm (money counted once at finalize)
-        if(o.team){ o.teamRiders[0].done = true; showTeamWait(o, method); return; }
-        finalizeDelivery(o, method);
+        
+        if (method === 'cod') {
+            // COD order: open payment collection sheet after confirmation
+            openDeliver(o);
+        } else {
+            // Prepaid order: finalize directly
+            if(o.team){ o.teamRiders[0].done = true; showTeamWait(o, method); return; }
+            finalizeDelivery(o, method);
+        }
     }
 
     function finalizeDelivery(o, method){
