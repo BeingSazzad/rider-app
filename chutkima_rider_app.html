@@ -2268,11 +2268,15 @@
                             <button onclick="resolvePrepaidAdj('qr_admin')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">QR Refund (via Admin)</button>
                             <button onclick="resolvePrepaidAdj('wallet')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Add Credit to Customer Wallet</button>
                         `;
-                    } else {
                         optionsWrap.innerHTML = `
-                            <button onclick="resolvePrepaidAdj('collect_cash')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Collect Cash from Customer</button>
-                            <button onclick="resolvePrepaidAdj('collect_qr')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Collect via QR Payment (via Rider)</button>
-                            <button onclick="resolvePrepaidAdj('charge_wallet')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Charge Customer Wallet</button>
+                            <div class="flex flex-col gap-2 w-full">
+                                <button onclick="resolvePrepaidAdj('collect_cash')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Collect Cash from Customer</button>
+                                <button onclick="resolvePrepaidAdj('collect_qr')" class="h-10 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 active:scale-[.98] transition-all">Collect via QR Payment (via Rider)</button>
+                                <div class="mt-2 text-center border-t border-slate-100 pt-2.5">
+                                    <span class="text-[11px] text-slate-400">Or customer can pay via Customer App</span>
+                                    <button onclick="syncCustomerAppPayment()" class="text-[11px] font-bold text-brand block mx-auto mt-0.5 hover:underline"><i class="fa-solid fa-rotate mr-1"></i>Check App Payment Status</button>
+                                </div>
+                            </div>
                         `;
                     }
                 } else {
@@ -2280,7 +2284,7 @@
                     document.getElementById('prepaidAdjStatusResolved').classList.remove('hidden');
                     let methodLabel = '';
                     if(adj.option === 'wallet') methodLabel = 'Add Credit to Customer Wallet';
-                    else if(adj.option === 'charge_wallet') methodLabel = 'Charge Customer Wallet';
+                    else if(adj.option === 'charge_wallet') methodLabel = 'Paid via Customer App (Wallet/Online)';
                     else if(adj.option === 'cash_rider') methodLabel = 'Cash Refund (via Rider)';
                     else if(adj.option === 'qr_admin') methodLabel = 'QR Refund (via Admin)';
                     else if(adj.option === 'collect_cash') methodLabel = 'Collect Cash from Customer';
@@ -2329,6 +2333,19 @@
         }
     }
 
+    function syncCustomerAppPayment() {
+        const o = cur(); if(!o) return;
+        const adj = o.substitutionAdjustment;
+        if (!adj) return;
+        
+        toast('Syncing status...', 'Checking server for customer app payment status.', 'fa-rotate', 'text-brand');
+        
+        setTimeout(() => {
+            resolvePrepaidAdj('charge_wallet');
+            toast('Payment Synced ✓', 'Customer paid NPR ' + adj.amount + ' from Wallet / Online.', 'fa-circle-check', 'text-emerald-500');
+        }, 1000);
+    }
+
     /* ----- Payment confirmation chain ----- */
     let deliverMethod = null;
     function openCashConfirm(){
@@ -2370,7 +2387,7 @@
                 const adj = o.substitutionAdjustment;
                 let optLabel = '';
                 if(adj.option === 'wallet') optLabel = 'Wallet Refund';
-                else if(adj.option === 'charge_wallet') optLabel = 'Wallet Charge';
+                else if(adj.option === 'charge_wallet') optLabel = 'Paid via App';
                 else if(adj.option === 'cash_rider') optLabel = 'Cash Refund';
                 else if(adj.option === 'qr_admin') optLabel = 'QR Refund';
                 else if(adj.option === 'collect_cash') optLabel = 'Cash Collection';
